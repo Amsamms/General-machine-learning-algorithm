@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, RandomForestRegressor, AdaBoostRegressor
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVC,SVR
 from sklearn.linear_model import LinearRegression
@@ -67,7 +67,7 @@ st.write('******************************************************************')
 st.write(X.shape,y.shape)
 
 
-models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),LinearRegression()]
+models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),LinearRegression(),GradientBoostingRegressor()]
 model=st.sidebar.selectbox('Choose algorithm model',models)
 st.write(model)
 
