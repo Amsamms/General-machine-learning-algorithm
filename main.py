@@ -158,7 +158,7 @@ if data is not None:
     st.write('******************************************************************')
     st.sidebar.write('Choose the percentage of NaN present in each column, any column having more than this percent will be removed from the dataset')
     zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,110,10)))
-    X.dropna(axis='columns', how='any', thresh=X.shape[0]*(zz/100), inplace=True)
+    X.dropna(axis='columns', how='any', thresh=X.shape[0]*(1-(zz/100)), inplace=True)
     st.sidebar.write('======================================')
     substitution=st.sidebar.radio("**replace Nan values by median or most frequent**",('Median','Most Frequent','Mean'))
     if substitution =='Median':
