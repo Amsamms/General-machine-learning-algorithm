@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVC,SVR
@@ -8,7 +9,9 @@ from sklearn.metrics import accuracy_score, r2_score, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler,PowerTransformer
 from sklearn.model_selection import train_test_split
 import streamlit as st
-import io
+
+
+st.set_page_config("machine learning app",":chart_with_upwards_trend:")#,layout="wide",initial_sidebar_state="expanded")
 
 def convert_to_number(data,number=np.nan):
     '''
@@ -230,7 +233,12 @@ if data is not None:
         st.write(comparing)
         st.write('******************************************************************')
         st.write(comparing.describe())
-    st.sidebar.write('======================================')    
+        fig,ax=plt.subplots()
+        plt.scatter(comparing['Actual'],comparing['prediction'])
+        ax.set_xlabel('Actual Y')
+        ax.set_ylabel('Predected Y')
+        st.pyplot(fig)
+    st.sidebar.write('======================================')        
     if st.sidebar.button('Export data to excel file ?'):
         comparing=pd.DataFrame()
         comparing['Actual']=y
