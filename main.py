@@ -1,3 +1,4 @@
+import py_compile
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,53 +9,11 @@ from sklearn.linear_model import LinearRegression, SGDRegressor, Lasso, ElasticN
 from sklearn.metrics import accuracy_score, r2_score, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler,PowerTransformer
 from sklearn.model_selection import train_test_split
+import plotly.express as px
 import streamlit as st
 
 
 st.set_page_config("machine learning app",":chart_with_upwards_trend:")#,layout="wide",initial_sidebar_state="expanded")
-
-def convert_to_number(data,number=np.nan):
-    '''
-    This function takes two arguments, the dataframe and the value that all non-numbers needs to be converted to
-    '''
-    df=data.copy()
-    
-    def is_not_number(x):
-        try:
-            float(x)
-            return False
-        except:
-            return True
-        
-    def is_number(x):
-        try:
-            float(x)
-            return True
-        except:
-            return False
-    
-    for column in df.columns:
-        df.loc[df[column].apply(is_not_number),column]=number
-    return df
-
-def to_float(data,x=0):
-    '''
-    converting all columns to float starting from x column, where x is the position of the columns
-    Nat values doesn't allow the column to be converted to float, be sure to remove all NAT values
-    
-    - inputs :  dataframe and the first column position to start converting from
-      syntax to_float(data,x=0)
-      
-    - output : dataframe that all of its columns are float, if possible
-    '''
-    df=data.copy()
-    columns = df.columns[x:]
-    for column in columns:
-        try:
-            df[column]=df[column].astype(float)
-        except:
-            pass
-    return df    
 
 st.title('Simple machine learner app')
 st.header('=================================')
@@ -134,7 +93,9 @@ else:
 if data is not None: 
     st.write(df_raw)
     st.write(' Kindly note that all not number cells  will be converted to Nan')
-    df=to_float(convert_to_number(df_raw))
+    df=df_raw.copy()
+    for column in df.columns:
+        df[column]=pd.to_numeric(df[column],errors='coerce')
     st.sidebar.write('======================================')
     yy=st.sidebar.selectbox('Choose target or dependent variable (y)',df.columns)
     st.sidebar.write('======================================')
@@ -143,7 +104,7 @@ if data is not None:
     st.sidebar.write('======================================')
     st.write('**you choosed**', yy,'***to be the target**')
     st.write('******************************************************************')
-    y=df[yy]
+    y=df[[yy]]
     st.write('Y has', y.isnull().sum(),' Nan values')
     st.write('******************************************************************')
     st.write('y description :', y.describe())
@@ -161,13 +122,18 @@ if data is not None:
     st.write('******************************************************************')
     st.sidebar.write('Choose the percentage of NaN present in each column, any column having more than this percent will be removed from the dataset')
     zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,110,10)))
-    X.dropna(axis='columns', how='any', thresh=X.shape[0]*(1-(zz/100)), inplace=True)
+    X=X.dropna(axis='columns', how='any', thresh=X.shape[0]*(1-(zz/100)))
     st.sidebar.write('======================================')
-    substitution=st.sidebar.radio("**replace Nan values by median or most frequent**",('Median','Most Frequent','Mean'))
+    substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Delete Nan rows'))
     if substitution =='Median':
+
         X=X.fillna(X.median())
     elif substitution =='Most Frequent':
         X=X.fillna(X.mode().iloc[0])
+
+    elif substitution =='Delete Nan rows':
+        X.dropna(inplace=True)
+        y=y.iloc[X.index]
     else:
         X=X.fillna(X.mean())
     st.write('X description after Nan removal:', X.describe())
@@ -233,11 +199,15 @@ if data is not None:
         st.write(comparing)
         st.write('******************************************************************')
         st.write(comparing.describe())
-        fig,ax=plt.subplots()
-        plt.scatter(comparing['Actual'],comparing['prediction'])
-        ax.set_xlabel('Actual Y')
-        ax.set_ylabel('Predected Y')
-        st.pyplot(fig)
+        #fig,ax=plt.subplots()
+        #plt.scatter(comparing['Actual'],comparing['prediction'])
+        #ax.set_xlabel('Actual Y')
+        #ax.set_ylabel('Predected Y')
+        #st.pyplot(fig)
+        figure = px.scatter(comparing,x='Actual', y='prediction')
+        st.plotly_chart(figure)
+
+
     st.sidebar.write('======================================')        
     if st.sidebar.button('Export data to excel file ?'):
         comparing=pd.DataFrame()
