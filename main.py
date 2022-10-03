@@ -37,7 +37,7 @@ with tab1:
 
 with tab2:
    st.header("Definitions")
-   list=['Target','Independent Variables','Features','Features importance', 'Training score','Testing score','coeffecient of determination (R^2)','Training set/Testing set','mean absolute error','Nan']
+   list=['Target','Independent Variables','Features','Features importance', 'Training score','Testing score','coeffecient of determination (R^2)','Training set/Testing set','mean absolute error','Nan','CSV']
    selection_tab2=st.selectbox('',list)
    if selection_tab2==list[0]: 
        st.markdown("* **Target** : this is the column that you want to predict based on independent variables, donated as Y, also known as dependent variable")
@@ -65,8 +65,9 @@ with tab2:
        st.markdown("* * mean absolute error is the mean of all absolute errors in all data")
    elif selection_tab2==list[9]:
        st.markdown("* **Nan** : Not a number, it mainly means missing values, so a column have 70 % Nan, means 70 % of this column has missing values")
-
-            
+   elif selection_tab2==list[10]:
+       st.markdown("* **CSV** : Comma Separated Values, this is extension can be thought of as simplified xlsx file, Microsoft office can export any excel file to be CSV ")
+        
 
 with tab3:
    st.header("About machine learning")
@@ -90,8 +91,11 @@ if data is not None:
 else:
     st.sidebar.write('*Kindly upload valid csv data')
     
-if data is not None: 
-    st.write(df_raw)
+if data is not None:
+    try: 
+        st.dataframe(df_raw)
+    except:
+        pass
     st.write(' Kindly note that all not number cells  will be converted to Nan')
     df=df_raw.copy()
     for column in df.columns:
