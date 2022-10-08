@@ -104,10 +104,12 @@ if data is not None:
     yy=st.sidebar.selectbox('Choose target or dependent variable (y)',df.columns)
     st.sidebar.write('======================================')
     st.sidebar.write('## Note')
+    st.sidebar.write('All Y values that is missing will be removed ')
     st.sidebar.write('All other columns will be chosen as independent variables (X1, X2,...etc)')
     st.sidebar.write('======================================')
     st.write('**you choosed**', yy,'***to be the target**')
     st.write('******************************************************************')
+    df.dropna(subset=[yy],inplace=True)
     y=df[[yy]]
     st.write('Y has', y.isnull().sum(),' Nan values')
     st.write('******************************************************************')
