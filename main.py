@@ -37,35 +37,37 @@ with tab1:
 
 with tab2:
    st.header("Definitions")
-   list=['Target','Independent Variables','Features','Features importance', 'Training score','Testing score','coeffecient of determination (R^2)','Training set/Testing set','mean absolute error','Nan','CSV']
+   list=['Target','Independent Variables','Dependent variable','Features','Features importance', 'Training score','Testing score','coeffecient of determination (R^2)','Training set/Testing set','mean absolute error','Nan','CSV']
    selection_tab2=st.selectbox('',list)
-   if selection_tab2==list[0]: 
+   if selection_tab2=='Target': 
        st.markdown("* **Target** : this is the column that you want to predict based on independent variables, donated as Y, also known as dependent variable")
-   elif selection_tab2==list[1]:
+   elif selection_tab2=='Independent Variables':
        st.markdown("* **Independent variables** : these are the columns that you predict the target from them , donated as X1,X2,..ect, also known as features")
-   elif selection_tab2==list[2]:
+   elif selection_tab2=='Dependent variable':
+       st.markdown("* **Dependent variable** : this is the column that you want to predict based on independent variables, donated as Y, also known as Target")
+   elif selection_tab2=='Features':
        st.markdown("* **Features** : the columns that you predict the target from them , donated as X1,X2,..ect, also known as independent variables")
-   elif selection_tab2==list[3]:
+   elif selection_tab2=='Features importance':
        st.markdown("* **Features importance** : The importance of each feature in predicting the target, higher number means higher importance")
-   elif selection_tab2==list[4]:
+   elif selection_tab2=='Training score':
        st.markdown("* **Training score** : The coeffecient of determination for the training set")
-   elif selection_tab2==list[5]:
+   elif selection_tab2=='Testing score':
        st.markdown("* **Testing score** : The coeffecient of determination for the testing set")
-   elif selection_tab2==list[6]:
+   elif selection_tab2=='coeffecient of determination (R^2)':
        st.markdown("* **coeffecient of determination** : is a number between 0 and 1 that measures how well a statistical model predicts an outcome, also known by R square")
        st.markdown("* if the number is 1 , the model is perfectly predicts the target")
        st.markdown("* if the number is 0 , the model is prediction is poor")
        st.markdown("* the higher the number, the better the model is")
-   elif selection_tab2==list[7]:
+   elif selection_tab2=='Training set/Testing set':
        st.markdown("* **Training set/Testing set** : usually the data are split into two subsets, training set and testing set")
        st.markdown("* training set is the data that fed into the machine learning model")
        st.markdown('* testing set is the data we test the model on, in this set we predect the target `Y_predect` and compare it with `Y_actual`')
-   elif selection_tab2==list[8]:
+   elif selection_tab2=='mean absolute error':
        st.markdown("* **mean absolute error** : Absolute Error is the amount of error in your measurements. It is the difference between the predicted value and “actual” value. For example, if a model predict weight to be 90 Kgs but you know  true weight is 89 pounds, then the model has an absolute error of `90 Kgs – 89 lbs = 1 lbs.` and that is for one data point")
        st.markdown("* * mean absolute error is the mean of all absolute errors in all data")
-   elif selection_tab2==list[9]:
+   elif selection_tab2=='Nan':
        st.markdown("* **Nan** : Not a number, it mainly means missing values, so a column have 70 % Nan, means 70 % of this column has missing values")
-   elif selection_tab2==list[10]:
+   elif selection_tab2=='CSV':
        st.markdown("* **CSV** : Comma Separated Values, this is extension can be thought of as simplified xlsx file, Microsoft office can export any excel file to be CSV ")
         
 
@@ -80,7 +82,7 @@ with tab3:
 with tab4:
    st.header("How to choose the algorithm")
    st.markdown("* the ultimate way is to test each and all algorithms, and choose the one that achieves the best score in both training and testing sets")
-   st.markdown("* in reality, this rarely happens as randomness plays a role here, also it is rarely found that one algorithms scores higher tha alle others in both training and testing sets")
+   st.markdown("* in reality, this rarely happens as randomness plays a role here, also it is rarely found that one algorithms scores higher than all others in both training and testing sets")
    st.markdown("* Here a methedology that can help in choosing the best model [SCI-KIT LEARN METHODOLOGY](https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html)")
 
 st.write('******************************************************************')
@@ -147,7 +149,6 @@ if data is not None:
     st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `after` Nan removal:')
     st.write('******************************************************************')
     st.write('X shape:',X.shape,'Y shape:',y.shape)
-
 
     models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),LinearRegression(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso()]
     st.sidebar.write('======================================')
