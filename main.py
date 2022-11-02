@@ -22,8 +22,9 @@ tab1, tab2, tab3, tab4 = st.tabs(["How to run the app", "Definitions","About mac
 
 with tab1:
    st.header("How to run the app")
-   st.markdown("* ##### all inputs or commands from the right sidebar")
-   st.markdown("* ##### all output is shown  in the main page")
+   st.markdown("* ##### All inputs or commands from the left sidebar")
+   st.markdown("* ##### All output is shown  in the main page")
+   st.markdown("* ##### It is recommended to clear cache before starting any new project from top right corner")
    st.markdown("1- upload csv file containing numeric values, with column names in the first row")
    st.markdown("2- Choose one of the columns as the target (Y), be sure that Y has no Nan values")
    st.markdown("3- All other columns will be automatically selected as independent variable (X1,X2,...ect)")
@@ -33,6 +34,7 @@ with tab1:
    st.markdown("7- the algorithm will run to find the best relation that describes target from independent variables")
    st.markdown("8- output is correlation of determination for training, testing sets and predicted target")
    st.markdown("9- output can be downloaded as CSV file")
+   st.markdown("10- Finally you can predect target by uploading CSV file identical to the previous one, with modified data for predection, any number of rows is accepted in this new csv file")
 
 
 with tab2:
@@ -86,7 +88,7 @@ with tab4:
    st.markdown("* Here a methedology that can help in choosing the best model [SCI-KIT LEARN METHODOLOGY](https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html)")
 
 st.write('******************************************************************')
-data=st.sidebar.file_uploader("Choose csv file to upload",type='csv')
+data= st.sidebar.file_uploader("Choose csv file to upload",type='csv',key='1')
 
 if data is not None:
     df_raw = pd.read_csv(data)
@@ -106,8 +108,8 @@ if data is not None:
     yy=st.sidebar.selectbox('Choose target or dependent variable (y)',df.columns)
     st.sidebar.write('======================================')
     st.sidebar.write('## Note')
-    st.sidebar.write('All Y values that is missing will be removed ')
-    st.sidebar.write('All other columns will be chosen as independent variables (X1, X2,...etc)')
+    st.sidebar.write('- All Y values that is missing will be removed ')
+    st.sidebar.write('- All other columns will be chosen as independent variables (X1, X2,...etc)')
     st.sidebar.write('======================================')
     st.write('**you choosed**', yy,'***to be the target**')
     st.write('******************************************************************')
@@ -152,15 +154,17 @@ if data is not None:
 
     models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),LinearRegression(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso()]
     st.sidebar.write('======================================')
-    model=st.sidebar.selectbox('Choose algorithm model',models)
-    st.write(model)
-
+    raw_model=st.sidebar.selectbox('Choose algorithm model',models)
+    st.write(raw_model)
     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
-
-    try:
-        model.fit(X_train,y_train,random_state=42)
-    except:
-        model.fit(X_train,y_train)
+    @st.cache(allow_output_mutation=True)
+    def model_select_fit(raw_model):     
+        try:
+            raw_model.fit(X_train,y_train,random_state=42)
+        except:
+            raw_model.fit(X_train,y_train)
+        return raw_model
+    model= model_select_fit(raw_model)
     y_train_pred=model.predict(X_train)
     y_test_pred=model.predict(X_test)
 
@@ -230,24 +234,44 @@ if data is not None:
         csv_2 = convert_df(comparing)
         st.download_button(label="Download feature importance as CSV", data=csv_1, file_name='features_importance.csv', mime='text/csv')
         st.download_button(label="Download actual/predicted Y as CSV", data=csv_2, file_name='Actual-predicted Y.csv', mime='text/csv')
+    
+    st.sidebar.write('======================================')
+st.sidebar.write('======================================') 
+st.sidebar.write('======================================') 
+st.sidebar.write('======================================') 
+st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
+data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type='csv',key='2')    
+if st.sidebar.button('predict target from input data?'):
+    st.sidebar.write('*Kindly upload valid csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
+    df_predict = pd.read_csv(data_predict)
+    X_for_predection=df_predict[X.columns]
+    st.header('Predection results')
+    st.subheader('    input raw data for predection   ')
+    st.dataframe(X_for_predection)
+    for column in X_for_predection.columns:
+        try:
+            X_for_predection[column]=pd.to_numeric(X_for_predection[column],errors='coerce')
+        except:
+            pass
+    try:
+        X_for_predection= X_for_predection.fillna(X_for_predection.mean())
+    except:
+        pass   
+    try:
+        X_for_predection= X_for_predection.fillna(X.mean())
+    except:
+        pass
+    predection_data=pd.DataFrame()
+    predection_data[yy]= model.predict(X_for_predection)
+    st.write('******************************************************************')
+    tab11, tab12 = st.columns(2)
+    with tab11:
+        st.markdown(" ##### Processed input data for predection")
+        st.dataframe(X_for_predection)
 
-
-
-
-
-
-
-
-
-
-
-
-       
-        
-
-
-
-
+    with tab12:
+        st.markdown(" ##### predected values from processed input")
+        st.dataframe(predection_data) 
 
 
 
