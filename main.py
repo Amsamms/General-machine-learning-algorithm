@@ -131,7 +131,7 @@ if data is not None:
     st.write(' kindly note that all nan values will be substituted either by most frequent,median or mean value for each column')
     st.write('******************************************************************')
     st.sidebar.write('Choose the percentage of NaN present in each column, any column having more than this percent will be removed from the dataset')
-    zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,110,10)))
+    zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,100,10)))
     X=X.dropna(axis='columns', how='any', thresh=X.shape[0]*(1-(zz/100)))
     st.sidebar.write('======================================')
     substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Delete Nan rows'))
@@ -271,7 +271,16 @@ if st.sidebar.button('predict target from input data?'):
 
     with tab12:
         st.markdown(" ##### predected values from processed input")
-        st.dataframe(predection_data) 
+        st.dataframe(predection_data)
+    def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+        return df.to_csv(index=False).encode('utf-8')
+    
+    data_for_download= pd.concat([X_for_predection,predection_data],axis=1)
+    csv_file = convert_df(data_for_download)
+    st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv')
+
+
 
 
 
