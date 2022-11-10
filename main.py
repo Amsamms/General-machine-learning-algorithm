@@ -10,6 +10,8 @@ from sklearn.metrics import accuracy_score, r2_score, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler,PowerTransformer
 from sklearn.model_selection import train_test_split
 import plotly.express as px
+import plotly.graph_objects as go
+import sklearn
 import streamlit as st
 
 
@@ -18,7 +20,7 @@ st.set_page_config("machine learning app",":chart_with_upwards_trend:")#,layout=
 st.title('Simple machine learner app')
 st.header('=================================')
 
-tab1, tab2, tab3, tab4 = st.tabs(["How to run the app", "Definitions","About machine learning","How to choose the algorithm"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["How to run the app", "Definitions","About machine learning","How to choose the algorithm", "Example"])
 
 with tab1:
    st.header("How to run the app")
@@ -87,11 +89,26 @@ with tab4:
    st.markdown("* in reality, this rarely happens as randomness plays a role here, also it is rarely found that one algorithms scores higher than all others in both training and testing sets")
    st.markdown("* Here a methedology that can help in choosing the best model [SCI-KIT LEARN METHODOLOGY](https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html)")
 
+with tab5:
+    st.markdown(" under preparation")
+    #st.video('https://www.youtube.com/watch?v=hdLL5jjEOXM')
+
 st.write('******************************************************************')
-data= st.sidebar.file_uploader("Choose csv file to upload",type='csv',key='1')
+data= st.sidebar.file_uploader("Choose excel or csv file to upload",type=['csv','xls','xlsx'],key='1')
 
 if data is not None:
-    df_raw = pd.read_csv(data)
+    try:
+        df_raw = pd.read_csv(data)
+    except:
+        pass
+    try:
+        df_raw = pd.read_excel(data)
+    except:
+        pass
+    try:
+        df_raw = pd.read_excel(data, engine='openpyxl')
+    except:
+        pass
 else:
     st.sidebar.write('*Kindly upload valid csv data')
     
@@ -106,10 +123,16 @@ if data is not None:
         df[column]=pd.to_numeric(df[column],errors='coerce')
     st.sidebar.write('======================================')
     yy=st.sidebar.selectbox('Choose target or dependent variable (y)',df.columns)
+    if st.sidebar.checkbox('remove some columns before modeling'):
+        removed_x=st.sidebar.multiselect('choose columns to be removed',df.drop(yy,axis=1).columns)
+        try:
+            df.drop(removed_x,axis=1,inplace=True)
+        except:
+            pass
     st.sidebar.write('======================================')
     st.sidebar.write('## Note')
     st.sidebar.write('- All Y values that is missing will be removed ')
-    st.sidebar.write('- All other columns will be chosen as independent variables (X1, X2,...etc)')
+    st.sidebar.write('- All other columns will be chosen as independent variables (X1, X2,...etc) unless "remove some columns before modeling" was checked')
     st.sidebar.write('======================================')
     st.write('**you choosed**', yy,'***to be the target**')
     st.write('******************************************************************')
@@ -143,7 +166,7 @@ if data is not None:
 
     elif substitution =='Delete Nan rows':
         X.dropna(inplace=True)
-        y=y.iloc[X.index]
+        y=y.loc[X.index]
     else:
         X=X.fillna(X.mean())
     st.write('X description after Nan removal:', X.describe())
@@ -156,6 +179,8 @@ if data is not None:
     st.sidebar.write('======================================')
     raw_model=st.sidebar.selectbox('Choose algorithm model',models)
     st.write(raw_model)
+    #st.write(type(raw_model))
+    #if isinstance(raw_model, sklearn.linear_model._base.LinearRegression):
     X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
     @st.cache(allow_output_mutation=True)
     def model_select_fit(raw_model):     
@@ -202,11 +227,12 @@ if data is not None:
         st.dataframe(feature_importance.sort_values(by='column coeffecient',ascending=False))
     st.sidebar.write('======================================')
     st.write('******************************************************************')
-    if st.sidebar.button('Compare prediction, with actual data ?'):
+    if st.sidebar.checkbox('Compare prediction, with actual data ?'):
         comparing=pd.DataFrame()
         comparing['Actual']=y
         comparing['prediction']=model.predict(X)
         comparing['difference']=np.abs(comparing['Actual']-comparing['prediction'])
+        st.subheader('actual Vs prediction')
         st.write(comparing)
         st.write('******************************************************************')
         st.write(comparing.describe())
@@ -220,7 +246,7 @@ if data is not None:
 
 
     st.sidebar.write('======================================')        
-    if st.sidebar.button('Export data to excel file ?'):
+    if st.sidebar.checkbox('Export data to excel file ?'):
         comparing=pd.DataFrame()
         comparing['Actual']=y
         comparing['prediction']=model.predict(X)
@@ -234,16 +260,55 @@ if data is not None:
         csv_2 = convert_df(comparing)
         st.download_button(label="Download feature importance as CSV", data=csv_1, file_name='features_importance.csv', mime='text/csv')
         st.download_button(label="Download actual/predicted Y as CSV", data=csv_2, file_name='Actual-predicted Y.csv', mime='text/csv')
+        st.write('******************************************************************')
     
     st.sidebar.write('======================================')
+    if st.sidebar.checkbox('feature_importance effect on target'):
+        st.subheader('feature effect on target')
+        st.write(' all other features will be averaged and the choosed feature will be left as it is, then the model will be run and to measure its effect on target a plot is drawn')
+        feature=st.sidebar.selectbox('Choose feature to evaluate its effect, based on the model',X.columns)
+        evaluation_df=X.copy()
+        for column in evaluation_df.drop(feature, axis=1).columns:
+            evaluation_df.loc[:,column]=evaluation_df[column].mean()
+        st.write(evaluation_df)
+        y_evaluation=model.predict(evaluation_df)
+        figure_1 = go.Figure()
+        figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers'))
+        figure_1.update_layout(xaxis_title=feature, yaxis_title=yy,title= f'effect of changing {feature} on {yy} ')
+        st.plotly_chart(figure_1)
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
 st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
 data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type='csv',key='2')    
-if st.sidebar.button('predict target from input data?'):
-    st.sidebar.write('*Kindly upload valid csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
-    df_predict = pd.read_csv(data_predict)
+if st.sidebar.checkbox('predict target from input data?'):
+    st.sidebar.write('*Kindly upload valid excel or csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
+    try:
+        df_predict = pd.read_csv(data_predict)
+    except:
+        pass
+    try:
+        df_predict = pd.read_excel(data_predict)
+    except:
+        pass
+    try:
+        df_predict = pd.read_excel(data_predict,engine='openpyxl')
+    except:
+        pass
     X_for_predection=df_predict[X.columns]
     st.header('Predection results')
     st.subheader('    input raw data for predection   ')
@@ -279,8 +344,7 @@ if st.sidebar.button('predict target from input data?'):
     data_for_download= pd.concat([X_for_predection,predection_data],axis=1)
     csv_file = convert_df(data_for_download)
     st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv')
-
-
-
+st.sidebar.write('======================================') 
+st.sidebar.write('======================================') 
 
 
