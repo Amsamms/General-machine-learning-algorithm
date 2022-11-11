@@ -129,6 +129,12 @@ if data is not None:
             df.drop(removed_x,axis=1,inplace=True)
         except:
             pass
+    if st.sidebar.checkbox('use only some columns in modeling'):
+        used_x=st.sidebar.multiselect('choose columns to be removed',df.drop(yy,axis=1).columns)
+        try:
+            df=pd.concat([df[used_x],df[yy]],axis=1)
+        except:
+            pass
     st.sidebar.write('======================================')
     st.sidebar.write('## Note')
     st.sidebar.write('- All Y values that is missing will be removed ')
@@ -275,26 +281,12 @@ if data is not None:
         figure_1 = go.Figure()
         figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers'))
         figure_1.update_layout(xaxis_title=feature, yaxis_title=yy,title= f'effect of changing {feature} on {yy} ')
-        st.plotly_chart(figure_1)
-        
-
-
-
-
-
-
-
-
-
-
-
-
-        
+        st.plotly_chart(figure_1)        
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
 st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
-data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type='csv',key='2')    
+data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type=['csv','xls','xlsx'],key='2')    
 if st.sidebar.checkbox('predict target from input data?'):
     st.sidebar.write('*Kindly upload valid excel or csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
     try:
