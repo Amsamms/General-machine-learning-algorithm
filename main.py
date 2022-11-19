@@ -206,6 +206,8 @@ if data is not None:
     testing_mean_error=mean_absolute_error(y_test,y_test_pred)
     feature_importance=pd.DataFrame()
     feature_importance['Name'] = X.columns
+    st.sidebar.write('training score = ',training_accuracy)
+    st.sidebar.write('testing score = ',testing_accuracy)
     try:   
         feature_importance['importance in the model']=model.feature_importances_
     except:
@@ -272,7 +274,8 @@ if data is not None:
     if st.sidebar.checkbox('feature_importance effect on target'):
         st.subheader('feature effect on target')
         st.write(' all other features will be averaged and the choosed feature will be left as it is, then the model will be run and to measure its effect on target a plot is drawn')
-        feature=st.sidebar.selectbox('Choose feature to evaluate its effect, based on the model',X.columns)
+        sorted_features= feature_importance.sort_values(by=feature_importance.columns[1],ascending=False)['Name'].values
+        feature=st.sidebar.selectbox('Choose feature to evaluate its effect, based on the model',sorted_features)
         evaluation_df=X.copy()
         for column in evaluation_df.drop(feature, axis=1).columns:
             evaluation_df.loc[:,column]=evaluation_df[column].mean()
