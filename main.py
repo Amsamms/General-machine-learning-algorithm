@@ -2,10 +2,10 @@ import py_compile
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, RandomForestRegressor, AdaBoostRegressor, GradientBoostingRegressor,GradientBoostingClassifier
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.svm import SVC,SVR
-from sklearn.linear_model import LinearRegression, SGDRegressor, Lasso, ElasticNet
+from sklearn.linear_model import LinearRegression, SGDRegressor, Lasso, ElasticNet, LogisticRegression
 from sklearn.metrics import accuracy_score, r2_score, mean_absolute_error
 from sklearn.preprocessing import MinMaxScaler,PowerTransformer
 from sklearn.model_selection import train_test_split
@@ -27,21 +27,24 @@ with tab1:
    st.markdown("* ##### All inputs or commands from the left sidebar")
    st.markdown("* ##### All output is shown  in the main page")
    st.markdown("* ##### It is recommended to clear cache before starting any new project from top right corner")
-   st.markdown("1- upload csv file containing numeric values, with column names in the first row")
-   st.markdown("2- Choose one of the columns as the target (Y), be sure that Y has no Nan values")
-   st.markdown("3- All other columns will be automatically selected as independent variable (X1,X2,...ect)")
-   st.markdown("4- all data that is not numbers will be converted to Nan automatically ")
-   st.markdown("5- Choose the Maximum allowed percent of Nan values per columns, columns which has higher percentage will be removed ")
-   st.markdown("6- Choose the algorithm")
-   st.markdown("7- the algorithm will run to find the best relation that describes target from independent variables")
-   st.markdown("8- output is correlation of determination for training, testing sets and predicted target")
-   st.markdown("9- output can be downloaded as CSV file")
-   st.markdown("10- Finally you can predect target by uploading CSV file identical to the previous one, with modified data for predection, any number of rows is accepted in this new csv file")
+   st.markdown("1- Upload csv or excel file with column names in the first row")
+   st.markdown("2- Choose one of the columns as the target (Y)")
+   st.markdown("3- All other columns will be by default automatically selected as independent variable (X1,X2,...ect) unless other options are checked")
+   st.markdown("4- You can choose to remove some columns from the model, or only include some models in the algorithm model")
+   st.markdown("5- All data that is not numbers will be converted to Nan automatically ")
+   st.markdown("6- Choose the Maximum allowed percent of Nan values per columns, columns which has higher percentage will be removed, default is 90 % ")
+   st.markdown("7- Choose Problem nature, weather continuous or Classification")
+   st.markdown("8- Choose the model algorithm")
+   st.markdown("9- The algorithm will run to find the best relation that describes target from independent variables")
+   st.markdown("10- Output is correlation of determination for training, testing sets and predicted target")
+   st.markdown("11- Output can be downloaded as CSV file")
+   st.markdown("12- You can check features effect on target visually")
+   st.markdown("13- Finally you can predict target by uploading CSV file identical to the previous one, with modified data for prediction, any number of rows is accepted in this new csv file")
 
 
 with tab2:
    st.header("Definitions")
-   list=['Target','Independent Variables','Dependent variable','Features','Features importance', 'Training score','Testing score','coeffecient of determination (R^2)','Training set/Testing set','mean absolute error','Nan','CSV']
+   list=['Target','Independent Variables','Dependent variable','Features','Features importance', 'Training score','Testing score','coeffecient of determination (R^2)','Training set/Testing set','mean absolute error','Nan','CSV','Continuos','Classification']
    selection_tab2=st.selectbox('',list)
    if selection_tab2=='Target': 
        st.markdown("* **Target** : this is the column that you want to predict based on independent variables, donated as Y, also known as dependent variable")
@@ -73,6 +76,10 @@ with tab2:
        st.markdown("* **Nan** : Not a number, it mainly means missing values, so a column have 70 % Nan, means 70 % of this column has missing values")
    elif selection_tab2=='CSV':
        st.markdown("* **CSV** : Comma Separated Values, this is extension can be thought of as simplified xlsx file, Microsoft office can export any excel file to be CSV ")
+   elif selection_tab2=='Continuos':
+       st.markdown("* **Continuos** : if the target is a continuous value, like age or temperature. Then the algorithm should be of continuos nature ")
+   elif selection_tab2=='Classification':
+       st.markdown("* **Classification** : if the target is a not-continuous value, like 0 or 1, good or bad, type-1 or type-2 or type-3. Then the algorithm should be classification algorithm ")
         
 
 with tab3:
@@ -180,30 +187,55 @@ if data is not None:
     st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `after` Nan removal:')
     st.write('******************************************************************')
     st.write('X shape:',X.shape,'Y shape:',y.shape)
-
-    models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),LinearRegression(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso()]
     st.sidebar.write('======================================')
-    raw_model=st.sidebar.selectbox('Choose algorithm model',models)
-    st.write(raw_model)
-    #st.write(type(raw_model))
-    #if isinstance(raw_model, sklearn.linear_model._base.LinearRegression):
-    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
-    @st.cache(allow_output_mutation=True)
-    def model_select_fit(raw_model):     
-        try:
-            raw_model.fit(X_train,y_train,random_state=42)
-        except:
-            raw_model.fit(X_train,y_train)
-        return raw_model
-    model= model_select_fit(raw_model)
-    y_train_pred=model.predict(X_train)
-    y_test_pred=model.predict(X_test)
+    problem_nature= st.sidebar.radio('Problem nature',['Continuos','Classification'],key='problem_nature')
+    if problem_nature=='Continuos': 
+        models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso()]
+        raw_model=st.sidebar.selectbox('Choose algorithm model',models)
+        st.write(raw_model)
+        #st.write(type(raw_model))
+        #if isinstance(raw_model, sklearn.linear_model._base.LinearRegression):
+        X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
+        @st.cache(allow_output_mutation=True)
+        def model_select_fit(raw_model):     
+            try:
+                raw_model.fit(X_train,y_train,random_state=42)
+            except:
+                raw_model.fit(X_train,y_train)
+            return raw_model
+        model= model_select_fit(raw_model)
+        y_train_pred=model.predict(X_train)
+        y_test_pred=model.predict(X_test)
 
-    training_accuracy=r2_score(y_train,y_train_pred)
-    training_mean_error=mean_absolute_error(y_train, y_train_pred)
+        training_accuracy=r2_score(y_train,y_train_pred)
+        training_mean_error=mean_absolute_error(y_train, y_train_pred)
 
-    testing_accuracy=r2_score(y_test,y_test_pred)
-    testing_mean_error=mean_absolute_error(y_test,y_test_pred)
+        testing_accuracy=r2_score(y_test,y_test_pred)
+        testing_mean_error=mean_absolute_error(y_test,y_test_pred)
+
+    if problem_nature=='Classification': 
+        models=[DecisionTreeClassifier(),RandomForestClassifier(),AdaBoostClassifier(),GradientBoostingClassifier()]
+        raw_model=st.sidebar.selectbox('Choose algorithm model',models)
+        st.write(raw_model)
+        #st.write(type(raw_model))
+        #if isinstance(raw_model, sklearn.linear_model._base.LinearRegression):
+        X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
+        @st.cache(allow_output_mutation=True)
+        def model_select_fit(raw_model):     
+            try:
+                raw_model.fit(X_train,y_train,random_state=42)
+            except:
+                raw_model.fit(X_train,y_train)
+            return raw_model
+        model= model_select_fit(raw_model)
+        y_train_pred=model.predict(X_train)
+        y_test_pred=model.predict(X_test)
+
+        training_accuracy=accuracy_score(y_train,y_train_pred)
+        training_mean_error=mean_absolute_error(y_train, y_train_pred)
+
+        testing_accuracy=accuracy_score(y_test,y_test_pred)
+        testing_mean_error=mean_absolute_error(y_test,y_test_pred)
     feature_importance=pd.DataFrame()
     feature_importance['Name'] = X.columns
     st.sidebar.write('training score = ',training_accuracy)
@@ -249,8 +281,9 @@ if data is not None:
         #ax.set_xlabel('Actual Y')
         #ax.set_ylabel('Predected Y')
         #st.pyplot(fig)
-        figure = px.scatter(comparing,x='Actual', y='prediction')
-        st.plotly_chart(figure)
+        if problem_nature=='Continuos':
+            figure = px.scatter(comparing,x='Actual', y='prediction')
+            st.plotly_chart(figure)
 
 
     st.sidebar.write('======================================')        
