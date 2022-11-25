@@ -155,8 +155,6 @@ if data is not None:
     st.write('******************************************************************')
     df.dropna(subset=[yy],inplace=True)
     y=df[[yy]]
-    st.write('Y has', y.isnull().sum(),' Nan values')
-    st.write('******************************************************************')
     st.write('y description :', y.describe())
     st.write('******************************************************************')
     X=df.drop(yy,axis=1)
@@ -164,9 +162,9 @@ if data is not None:
     st.write('******************************************************************')
     st.write('******************************************************************')
     st.write('******************************************************************')
-    st.write('X description before Nan removal:', X.describe())
+    st.write('X description before Nan processing:', X.describe())
     st.write('******************************************************************')
-    st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `before` Nan removal:')
+    st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `before` Nan processing:')
     st.write('******************************************************************')
     st.write(' kindly note that all nan values will be substituted either by most frequent,median or mean value for each column')
     st.write('******************************************************************')
@@ -186,15 +184,15 @@ if data is not None:
         y=y.loc[X.index]
     else:
         X=X.fillna(X.mean())
-    st.write('X description after Nan removal:', X.describe())
+    st.write('X description after Nan processing:', X.describe())
     st.write('******************************************************************')
-    st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `after` Nan removal:')
+    st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `after` Nan processing:')
     st.write('******************************************************************')
     st.write('X shape:',X.shape,'Y shape:',y.shape)
     st.sidebar.write('======================================')
     problem_nature= st.sidebar.radio('Problem nature',['Continuos','Classification'],key='problem_nature')
     if problem_nature=='Continuos': 
-        models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso()]
+        models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso(),LinearRegression(),SVR(kernel='linear')]
         raw_model=st.sidebar.selectbox('Choose algorithm model',models)
         st.write(raw_model)
         #st.write(type(raw_model))
@@ -218,7 +216,7 @@ if data is not None:
         testing_mean_error=mean_absolute_error(y_test,y_test_pred)
 
     if problem_nature=='Classification': 
-        models=[DecisionTreeClassifier(),RandomForestClassifier(),AdaBoostClassifier(),GradientBoostingClassifier()]
+        models=[DecisionTreeClassifier(),RandomForestClassifier(),AdaBoostClassifier(),GradientBoostingClassifier(),SVC(kernel='linear')]
         raw_model=st.sidebar.selectbox('Choose algorithm model',models)
         st.write(raw_model)
         #st.write(type(raw_model))
@@ -247,12 +245,11 @@ if data is not None:
     try:   
         feature_importance['importance in the model']=model.feature_importances_
     except:
-        pass
+        pass 
     try:
-        feature_importance['column coeffecient']=np.abs(model.coef_)
+        feature_importance['column coeffecient']=np.abs(model.coef_[0])
     except:
         pass
-
 
     st.title('Machine learning model results:')
     st.header('training score:' )
