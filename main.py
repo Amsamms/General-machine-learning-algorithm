@@ -7,12 +7,16 @@ from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.svm import SVC,SVR
 from sklearn.linear_model import LinearRegression, SGDRegressor, Lasso, ElasticNet, LogisticRegression
 from sklearn.metrics import accuracy_score, r2_score, mean_absolute_error
-from sklearn.preprocessing import MinMaxScaler,PowerTransformer
+from sklearn.preprocessing import MinMaxScaler,PowerTransformer, PolynomialFeatures
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.neighbors import KNeighborsRegressor
 import plotly.express as px
 import plotly.graph_objects as go
 import sklearn
+import shap
 import streamlit as st
+import streamlit.components.v1 as components
 
 
 st.set_page_config("machine learning app",":chart_with_upwards_trend:")#,layout="wide",initial_sidebar_state="expanded")
@@ -192,18 +196,31 @@ if data is not None:
     st.sidebar.write('======================================')
     problem_nature= st.sidebar.radio('Problem nature',['Continuos','Classification'],key='problem_nature')
     if problem_nature=='Continuos': 
-        models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso(),LinearRegression(),SVR(kernel='linear')]
+        models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso(),LinearRegression(),SVR(kernel='linear'),SVR(kernel="rbf"),'polynominal regression',KNeighborsRegressor()]
         raw_model=st.sidebar.selectbox('Choose algorithm model',models)
         st.write(raw_model)
         #st.write(type(raw_model))
         #if isinstance(raw_model, sklearn.linear_model._base.LinearRegression):
+        if raw_model=='polynominal regression':
+            degree=st.sidebar.slider('choose polynominal degree',2,6,3,1)
         X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
         @st.cache(allow_output_mutation=True)
-        def model_select_fit(raw_model):     
-            try:
-                raw_model.fit(X_train,y_train,random_state=42)
-            except:
+        def model_select_fit(raw_model):
+            if raw_model=='polynominal regression':
+                #scaler=MinMaxScaler()
+                #global X_scaled
+                #X_scaled=scaler.fit_transform(X_train)
+                #poly=PolynomialFeatures(degree=4)
+                #global X_poly
+                #X_poly=poly.fit_transform(X_scaled)
+                #X_poly=poly.fit_transform(X_train)
+                raw_model=Pipeline([('polynominal',PolynomialFeatures(degree=degree)),('linear regression',LinearRegression())])
                 raw_model.fit(X_train,y_train)
+            else:
+                try:
+                    raw_model.fit(X_train,y_train,random_state=42)
+                except:
+                    raw_model.fit(X_train,y_train)
             return raw_model
         model= model_select_fit(raw_model)
         y_train_pred=model.predict(X_train)
@@ -238,19 +255,9 @@ if data is not None:
 
         testing_accuracy=accuracy_score(y_test,y_test_pred)
         testing_mean_error=mean_absolute_error(y_test,y_test_pred)
-    feature_importance=pd.DataFrame()
-    feature_importance['Name'] = X.columns
+
     st.sidebar.write('training score = ',training_accuracy)
     st.sidebar.write('testing score = ',testing_accuracy)
-    try:   
-        feature_importance['importance in the model']=model.feature_importances_
-    except:
-        pass 
-    try:
-        feature_importance['column coeffecient']=np.abs(model.coef_[0])
-    except:
-        pass
-
     st.title('Machine learning model results:')
     st.header('training score:' )
     st.write(training_accuracy)
@@ -261,11 +268,61 @@ if data is not None:
     st.header('testing mean absolute error:')
     st.write(testing_mean_error)
     st.write('******************************************************************')
-    st.header('feature importance:')
-    try:
-        st.dataframe(feature_importance.sort_values(by='importance in the model',ascending=False))
-    except:
-        st.dataframe(feature_importance.sort_values(by='column coeffecient',ascending=False))
+    #st.sidebar.write('======================================')
+    feature_importance=pd.DataFrame()
+    if raw_model=='polynominal regression':
+        feature_importance['Name'] = model.steps[0][1].get_feature_names_out(input_features=X.columns)
+        feature_importance['column coeffecient'] = np.abs(model.steps[1][1].coef_[0])
+        if st.sidebar.checkbox('polynominal feature importance'):
+            st.header('polynominal features importance')
+            st.dataframe(feature_importance.sort_values(by='column coeffecient',ascending=False))
+    # else:
+    #     feature_importance['Name'] = X.columns
+    #     try:   
+    #         feature_importance['importance in the model']=model.feature_importances_
+    #     except:
+    #         pass 
+    #     try:
+    #         feature_importance['column coeffecient']=np.abs(model.coef_[0])
+    #     except:
+    #         pass 
+
+
+    # if st.sidebar.checkbox('Basic feature importance',value=True):
+    #     st.header(' Basic feature importance:')
+
+    #     try:
+    #         st.dataframe(feature_importance.sort_values(by='importance in the model',ascending=False))
+    #     except:
+    #         st.dataframe(feature_importance.sort_values(by='column coeffecient',ascending=False))
+    # st.write('******************************************************************')
+
+    # st.sidebar.write('======================================') 
+    # if st.sidebar.checkbox('Shaply feature importance',value=True):
+    st.sidebar.write('======================================')
+    if st.sidebar.checkbox('Features importance'):
+        st.header(' Shaply feature importance:')
+        @st.cache
+        def detailed_importance():
+            # Fits the explainer
+            explainer = shap.Explainer(model.predict, X_test)
+            # Calculates the SHAP values - It takes some time
+            shap_values = explainer(X_test)
+            return shap_values
+        
+        shap_values=detailed_importance()
+
+        Feature_importance_shap=pd.DataFrame()
+        Feature_importance_shap['Name']=shap_values.feature_names
+        Feature_importance_shap['importance']=np.mean(np.abs(shap_values.values),axis=0)
+        st.dataframe(Feature_importance_shap.sort_values(by='importance',ascending=False))
+        #figure,axis=
+        fig, ax = plt.subplots()
+        shap.summary_plot(shap_values)
+        st.pyplot(fig)
+        #st.pyplot(fig=shap.summary_plot(shap_values),clear_figure=False)
+
+
     st.sidebar.write('======================================')
     st.write('******************************************************************')
     if st.sidebar.checkbox('Compare prediction, with actual data ?'):
@@ -287,6 +344,8 @@ if data is not None:
             st.plotly_chart(figure)
 
 
+
+
     st.sidebar.write('======================================')        
     if st.sidebar.checkbox('Export data to excel file ?'):
         comparing=pd.DataFrame()
@@ -298,27 +357,57 @@ if data is not None:
             # IMPORTANT: Cache the conversion to prevent computation on every rerun
             return df.to_csv(index=False).encode('utf-8')
 
-        csv_1 = convert_df(feature_importance)
+        # csv_1 = convert_df(feature_importance)
+        csv_1=convert_df(Feature_importance_shap)
         csv_2 = convert_df(comparing)
         st.download_button(label="Download feature importance as CSV", data=csv_1, file_name='features_importance.csv', mime='text/csv')
         st.download_button(label="Download actual/predicted Y as CSV", data=csv_2, file_name='Actual-predicted Y.csv', mime='text/csv')
         st.write('******************************************************************')
     
     st.sidebar.write('======================================')
-    if st.sidebar.checkbox('feature_importance effect on target'):
-        st.subheader('feature effect on target')
+    if st.sidebar.checkbox('feature importance effect on target'):
+        # effect=st.sidebar.radio('',options=['Basic','Shaply'])
+        # if effect =='Basic':
+        #     st.subheader('feature effect on target')
+        #     st.write(' all other features will be averaged and the choosed feature will be left as it is, then the model will be run and to measure its effect on target a plot is drawn')
+        #     sorted_features= feature_importance.sort_values(by=feature_importance.columns[1],ascending=False)['Name'].values
+        #     feature=st.sidebar.selectbox('Choose feature to evaluate its effect, based on the model',sorted_features)
+        #     if raw_model !='polynominal regression':
+        #         evaluation_df=X.copy()
+        #         for column in evaluation_df.drop(feature, axis=1).columns:
+        #             evaluation_df.loc[:,column]=evaluation_df[column].mean()
+        #         st.write(evaluation_df)
+        #         y_evaluation=model.predict(evaluation_df)
+        #         figure_1 = go.Figure()
+        #         figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers'))
+        #         figure_1.update_layout(xaxis_title=feature, yaxis_title=yy,title= f'effect of changing {feature} on {yy} ')
+        #         st.plotly_chart(figure_1)
+        #     else:
+        #         st.write(" * if algorith is polynominal regression, feature importance will be hard to plot ")
+        # else:
+        st.subheader('shaply feature effect on target')
         st.write(' all other features will be averaged and the choosed feature will be left as it is, then the model will be run and to measure its effect on target a plot is drawn')
-        sorted_features= feature_importance.sort_values(by=feature_importance.columns[1],ascending=False)['Name'].values
+        sorted_features= Feature_importance_shap.sort_values(by=Feature_importance_shap.columns[1],ascending=False)['Name'].values
         feature=st.sidebar.selectbox('Choose feature to evaluate its effect, based on the model',sorted_features)
+        # if raw_model !='polynominal regression':
         evaluation_df=X.copy()
         for column in evaluation_df.drop(feature, axis=1).columns:
             evaluation_df.loc[:,column]=evaluation_df[column].mean()
+        for column in evaluation_df.drop(feature, axis=1).columns:
+            evaluation_df[column]=pd.to_numeric(evaluation_df[column],errors='coerce')
         st.write(evaluation_df)
         y_evaluation=model.predict(evaluation_df)
+        if len(y_evaluation.shape)==1:
+            pass
+        else:
+            y_evaluation=y_evaluation.reshape(-1)
         figure_1 = go.Figure()
         figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers'))
         figure_1.update_layout(xaxis_title=feature, yaxis_title=yy,title= f'effect of changing {feature} on {yy} ')
-        st.plotly_chart(figure_1)        
+        st.plotly_chart(figure_1)
+        # else:
+        #     st.write(" * if algorith is polynominal regression, feature importance will be hard to plot ")
+
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
@@ -326,6 +415,10 @@ st.sidebar.markdown("### upload files in the second upload bottom only when you 
 data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type=['csv','xls','xlsx'],key='2')    
 if st.sidebar.checkbox('predict target from input data?'):
     st.sidebar.write('*Kindly upload valid excel or csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
+    try:
+        df_predict = pd.read_csv(data_predict,encoding_errors='ignore')
+    except:
+        pass
     try:
         df_predict = pd.read_csv(data_predict)
     except:
@@ -350,13 +443,15 @@ if st.sidebar.checkbox('predict target from input data?'):
     try:
         X_for_predection= X_for_predection.fillna(X_for_predection.mean())
     except:
-        pass   
-    try:
         X_for_predection= X_for_predection.fillna(X.mean())
-    except:
-        pass
+          
     predection_data=pd.DataFrame()
-    predection_data[yy]= model.predict(X_for_predection)
+    predics=model.predict(X_for_predection)
+    if len(predics)==1:
+        pass
+    else:
+        predics=predics.reshape(-1)
+    predection_data[yy]= predics
     st.write('******************************************************************')
     tab11, tab12 = st.columns(2)
     with tab11:
