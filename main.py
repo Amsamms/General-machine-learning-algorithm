@@ -154,16 +154,16 @@ if data is not None:
         zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,100,10)))        
         df=df.dropna(axis='columns', how='any', thresh=df.shape[0]*(1-(zz/100)))
         substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Forward fill','Backward fill','Delete Nan rows'))
-        if substitution =='Median':
+        if substitution =='Replace by Median':
             df=df.fillna(df.median())
-        elif substitution =='Most Frequent':
+        elif substitution =='Replace by Most Frequent':
             df=df.fillna(df.mode().iloc[0])
         elif substitution =='Delete Nan rows':
             df.dropna(inplace=True)
         elif substitution=='Forward fill':
             df=df.ffill(axis=0)
         elif substitution=='Backward fill':
-            df.bfill(axis ='rows')
+            df=df.bfill(axis ='rows')
         else:
             df=df.fillna(df.mean())
         st.write('dataset after nan processing')
