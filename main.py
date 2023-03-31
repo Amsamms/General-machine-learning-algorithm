@@ -112,6 +112,8 @@ with tab5:
     #st.video('https://www.youtube.com/watch?v=hdLL5jjEOXM')
 
 st.write('******************************************************************')
+
+# Uploading data and converting it to numbers only 
 data= st.sidebar.file_uploader("Choose excel or csv file to upload",type=['csv','xls','xlsx'],key='1')
 if data is not None:
     try:
@@ -140,7 +142,6 @@ if data is not None:
         st.write('******************************************************************')
     except:
         pass
-    #st.write(' Kindly note that all not number cells  will be converted to Nan')
     df=df_raw.copy()
     for column in df.columns:
         df[column]=pd.to_numeric(df[column],errors='coerce')
@@ -148,12 +149,40 @@ if data is not None:
 
 
     st.sidebar.write('======================================')
+    
+    # Choosing Target and modeling configuration
+    yy = st.sidebar.selectbox('Choose target or dependent variable (y)', df.columns)
+
+    cols = df.columns.tolist()
+    cols.remove(yy)
+    if st.sidebar.checkbox('remove some columns before modeling'):
+        try:
+            removed_x = st.sidebar.multiselect('choose columns to be removed', cols)
+            cols = [col for col in cols if col not in removed_x]
+        except:
+            st.write("The selected columns could not be removed from modeling")
+            pass
+    if st.sidebar.checkbox('use only some columns in modeling'):
+        try:
+            used_x = st.sidebar.multiselect('choose columns to be used in modeling', cols)
+            cols = [col for col in used_x if col != yy]
+        except:
+            st.write("the selected columns could not be used in modeling")
+            pass
+
+    df = df[cols + [yy]]
+    st.sidebar.write('======================================')
+    
+    #Saving dataframe before preprocessing
+    df_before_preprocessing=df.copy()
+
+      
     # preprocessing options
-    if st.sidebar.checkbox(" process Nan values"):
+    if st.sidebar.checkbox(" process Nan values",value=True):
         st.sidebar.write('Choose the percentage of NaN present in each column, any column having more than this percent will be removed from the dataset')
         zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,100,10)))        
         df=df.dropna(axis='columns', how='any', thresh=df.shape[0]*(1-(zz/100)))
-        substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Forward fill','Backward fill','Delete Nan rows'))
+        substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Forward fill','Backward fill','Delete Nan rows'),index=5)
         if substitution =='Replace by Median':
             df=df.fillna(df.median())
         elif substitution =='Replace by Most Frequent':
@@ -166,12 +195,13 @@ if data is not None:
             df=df.bfill(axis ='rows')
         else:
             df=df.fillna(df.mean())
+        st.sidebar.write('======================================')
         st.write('dataset after nan processing')
         st.write(df.describe())
-        st.write('******************************************************************')
+        st.write('******************************************************************')        
     if st.sidebar.checkbox("Remove outliers from the data set"):
         try:
-            outlier_limit=st.sidebar.slider('Number of Standard deviations data will be filtered upon',1.0,8.0,4.0,0.2)
+            outlier_limit=st.sidebar.slider('Number of Standard deviations data will be filtered upon',1.0,10.0,4.0,0.2)
             def df_without_outliers (data,a=4.0):
                 df=data.copy()    
                 z_scores = stats.zscore(df[df.describe().columns],nan_policy='omit')
@@ -187,6 +217,10 @@ if data is not None:
             st.write('dataset could not be outliers removed')
             pass
         st.write('******************************************************************')
+        st.sidebar.write('======================================')
+    # Saving dataframe after outlier removal and nan processing   
+    df_after_outlierremov_and_nanprocess=df.copy()
+    
     if st.sidebar.checkbox(" Normalize dataset",key='n'):
         try:
             min_limit=st.sidebar.number_input('all columns will have minimum of:',value=1)
@@ -198,7 +232,8 @@ if data is not None:
         except:
             st.write('dataset could not be normalized')
             pass
-        st.write('******************************************************************')   
+        st.write('******************************************************************')
+        st.sidebar.write('======================================')   
     if st.sidebar.checkbox("Make dataset has normal distribution-(Normalize should be checked)",key='n_d'):
         try:
             power_transformer=PowerTransformer(standardize=False)
@@ -224,57 +259,24 @@ if data is not None:
 
 
 
-
+    #Saving df after processing
     Whole_df_after_preprocessing=df.copy()
 
 
-    yy=st.sidebar.selectbox('Choose target or dependent variable (y)',df.columns)
-    if st.sidebar.checkbox('remove some columns before modeling'):
-        removed_x=st.sidebar.multiselect('choose columns to be removed',df.drop(yy,axis=1).columns)
-        try:
-            df.drop(removed_x,axis=1,inplace=True)
-        except:
-            st.write("The selected columns could not be removed from modeling")
-            pass
-    if st.sidebar.checkbox('use only some columns in modeling'):
-        used_x=st.sidebar.multiselect('choose columns to be used in modeling',df.drop(yy,axis=1).columns)
-        try:
-            df=pd.concat([df[used_x],df[yy]],axis=1)
-        except:
-            st.write("the selected columns could not be used in modeling")
-            pass
-    st.sidebar.write('======================================')
-    st.sidebar.write('## Note')
-    st.sidebar.write('- All other columns will be chosen as independent variables (X1, X2,...etc) unless "remove some columns before modeling" was checked')
-    st.sidebar.write('======================================')
+
+    # Assigning X and y
     st.write('**you choosed**', yy,'***to be the target**')
     st.write('******************************************************************')
-    df.dropna(subset=[yy],inplace=True)
     y=df[[yy]]
     st.write('y description :', y.describe())
     st.write('******************************************************************')
     X=df.drop(yy,axis=1)
-    X=X[X.describe().columns]
     st.write('******************************************************************')
     st.write('******************************************************************')
     st.write('******************************************************************')
-    #st.write('X description before Nan processing:', X.describe())
-    #st.write('******************************************************************')
-    #st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `before` Nan processing:')
-    #st.write('******************************************************************')
-    #st.write(' kindly note that all nan values will be substituted either by most frequent,median or mean value for each column')
-    #st.write('******************************************************************')
-    
-
-
-    st.sidebar.write('======================================')
-
-    #st.write('X description after Nan processing:', X.describe())
-    #st.write('******************************************************************')
-    #st.write(f'X has {X.isnull().sum().sum()} missing values and {X.shape[1]} columns `after` Nan processing:')
-    #st.write('******************************************************************')
     st.write('X shape:',X.shape,'Y shape:',y.shape)
-    st.sidebar.write('======================================')
+      
+    # Modeling and choosing algorithm
     problem_nature= st.sidebar.radio('Problem nature',['Continuos','Classification'],key='problem_nature')
     if problem_nature=='Continuos': 
         models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso(),LinearRegression(),SVR(kernel='linear'),SVR(kernel="rbf"),'polynomial regression',KNeighborsRegressor()]
@@ -287,6 +289,7 @@ if data is not None:
         X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
         @st.cache(allow_output_mutation=True)
         def model_select_fit(raw_model):
+            # IMPORTANT: Cache model_select_fit to prevent computation on every rerun
             if raw_model=='polynomial regression':
                 #scaler=MinMaxScaler()
                 #global X_scaled
@@ -337,6 +340,7 @@ if data is not None:
         testing_accuracy=accuracy_score(y_test,y_test_pred)
         testing_mean_error=mean_absolute_error(y_test,y_test_pred)
 
+    #Displaying results
     st.sidebar.write('training score = ',training_accuracy)
     st.sidebar.write('testing score = ',testing_accuracy)
     st.title('Machine learning model results:')
@@ -349,7 +353,8 @@ if data is not None:
     st.header('testing mean absolute error:')
     st.write(testing_mean_error)
     st.write('******************************************************************')
-    #st.sidebar.write('======================================')
+    
+    #Features importance calculations
     feature_importance=pd.DataFrame()
     if raw_model=='polynomial regression':
         feature_importance['Name'] = model.steps[0][1].get_feature_names_out(input_features=X.columns)
@@ -370,7 +375,8 @@ if data is not None:
         if len(feature_importance.columns)<2:
             shap_features=1
 
-
+    #Features importance display
+    st.sidebar.write('======================================')
     if st.sidebar.checkbox('feature importance',value=True):
         effect=st.sidebar.radio('',options=['Fast(not accurate enough)','Shaply( slow but accurate)'])
         if effect=='Fast(not accurate enough)':
@@ -389,6 +395,7 @@ if data is not None:
             st.header(' Shaply feature importance:')
             @st.cache
             def detailed_importance():
+            # IMPORTANT: Cache Shaply features to prevent computation on every rerun
                 # Fits the explainer
                 explainer = shap.Explainer(model.predict, X_test)
                 # Calculates the SHAP values - It takes some time
@@ -399,41 +406,11 @@ if data is not None:
             feature_importance['Name']=shap_values.feature_names
             feature_importance['importance']=np.mean(np.abs(shap_values.values),axis=0)
             st.dataframe(feature_importance.sort_values(by='importance',ascending=False))
-            #figure,axis=
             fig, ax = plt.subplots()
             shap.summary_plot(shap_values)
             st.pyplot(fig)
             #st.pyplot(fig=shap.summary_plot(shap_values),clear_figure=False)
-
-
     st.write('******************************************************************')
-
-    #st.sidebar.write('======================================') 
-    # if st.sidebar.checkbox('Shaply feature importance',value=True):
-    # st.sidebar.write('======================================')
-    # if st.sidebar.checkbox('Features importance'):
-    #     st.header(' Shaply feature importance:')
-    #     @st.cache
-    #     def detailed_importance():
-    #         # Fits the explainer
-    #         explainer = shap.Explainer(model.predict, X_test)
-    #         # Calculates the SHAP values - It takes some time
-    #         shap_values = explainer(X_test,max_evals="auto")
-    #         return shap_values
-        
-    #     shap_values=detailed_importance()
-
-    #     feature_importance_shap=pd.DataFrame()
-    #     feature_importance_shap['Name']=shap_values.feature_names
-    #     feature_importance_shap['importance']=np.mean(np.abs(shap_values.values),axis=0)
-    #     st.dataframe(feature_importance_shap.sort_values(by='importance',ascending=False))
-    #     #figure,axis=
-    #     fig, ax = plt.subplots()
-    #     shap.summary_plot(shap_values)
-    #     st.pyplot(fig)
-    #     #st.pyplot(fig=shap.summary_plot(shap_values),clear_figure=False)
-
-
 
     # after predicting converting the values to the initial form
     Whole_df_after_preprocessing_contains_y_predict = Whole_df_after_preprocessing.copy()
@@ -446,50 +423,31 @@ if data is not None:
         Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(power_transformer.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)
     if st.session_state['n']:
         Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(minmax_scaler.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)     
-
-    # st.write(yy)
-    # st.subheader('Raw df')
-    # st.write(df_whole_numbers.loc[Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.index,:])
-    # st.write(df_whole_numbers.loc[Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.index,:].shape)
-    # st.subheader('original df after processing')
-    # st.write(Whole_df_after_preprocessing)
-    # st.write(Whole_df_after_preprocessing.shape)
-    # st.subheader('original df after processing, with predicted values')
-    # st.write(Whole_df_after_preprocessing_contains_y_predict)
-    # st.write(Whole_df_after_preprocessing_contains_y_predict.shape)
-    # st.subheader('original df after back transfer, with predicted')
-    # st.write(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original)
-    # st.write(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.shape)    
-
-
     st.sidebar.write('======================================')
     st.write('******************************************************************')
+    
+    # Display comparing data
     if st.sidebar.checkbox('Compare prediction, with actual data ?'):
         comparing=pd.DataFrame()
-        comparing['Actual']=y
-        comparing['prediction']=model.predict(X)
+        comparing['Actual']= df_after_outlierremov_and_nanprocess[yy].values
+        comparing['prediction']=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original[yy].values
         comparing['difference']=np.abs(comparing['Actual']-comparing['prediction'])
         st.subheader('actual Vs prediction')
         st.write(comparing)
         st.write('******************************************************************')
         st.write(comparing.describe())
-        #fig,ax=plt.subplots()
-        #plt.scatter(comparing['Actual'],comparing['prediction'])
-        #ax.set_xlabel('Actual Y')
-        #ax.set_ylabel('Predected Y')
-        #st.pyplot(fig)
         if problem_nature=='Continuos':
             figure = px.scatter(comparing,x='Actual', y='prediction')
             st.plotly_chart(figure)
 
 
 
-
+    # Export data to excel files
     st.sidebar.write('======================================')        
     if st.sidebar.checkbox('Export data to excel file ?'):
         comparing=pd.DataFrame()
-        comparing['Actual']=y
-        comparing['prediction']=model.predict(X)
+        comparing['Actual']=df_after_outlierremov_and_nanprocess[yy].values
+        comparing['prediction']=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original[yy].values
         comparing['difference']=np.abs(comparing['Actual']-comparing['prediction'])
         @st.cache
         def convert_df(df):
@@ -497,14 +455,15 @@ if data is not None:
             return df.to_csv(index=False).encode('utf-8')
 
         # csv_1 = convert_df(feature_importance)
-        csv_1=convert_df(feature_importance)
+        csv_1= convert_df(feature_importance)
         csv_2 = convert_df(comparing)
         csv_3 = convert_df(Whole_df_after_preprocessing)
         st.download_button(label="Download feature importance as CSV", data=csv_1, file_name='features_importance.csv', mime='text/csv')
         st.download_button(label="Download actual/predicted Y as CSV", data=csv_2, file_name='Actual-predicted Y.csv', mime='text/csv')
-        st.download_button(label="Download processed dataset before modeling", data=csv_3, file_name='Processed_dataset.csv', mime='text/csv')
+        st.download_button(label="Download dataset after processing steps", data=csv_3, file_name='Processed_dataset.csv', mime='text/csv')
         st.write('******************************************************************')
     
+    # display feature effect on target
     st.sidebar.write('======================================')
     if st.sidebar.checkbox('feature importance effect on target'):
         if effect =='Fast(not accurate enough)':
@@ -559,75 +518,94 @@ st.sidebar.write('======================================')
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
  
-# if st.sidebar.checkbox('predict target from input data?'):
-#     st.write('******************************************************************')    
-#     st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
-#     data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type=['csv','xls','xlsx'],key='2')  
-#     st.sidebar.write('*Kindly upload valid excel or csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
-#     try:
-#         df_predict = pd.read_csv(data_predict,encoding_errors='ignore')
-#     except:
-#         pass
-#     try:
-#         df_predict = pd.read_csv(data_predict)
-#     except:
-#         pass
-#     try:
-#         df_predict = pd.read_excel(data_predict)
-#     except:
-#         pass
-#     try:
-#         df_predict = pd.read_excel(data_predict,engine='openpyxl')
-#     except:
-#         pass
+if st.sidebar.checkbox('predict target from input data?'):
+    st.write('******************************************************************')    
+    st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
+    data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type=['csv','xls','xlsx'],key='2')  
+    st.sidebar.write('*Kindly upload valid excel or csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
+    if data_predict is not None:  
+        try:
+            df_predict = pd.read_csv(data_predict,encoding_errors='ignore')
+        except:
+            pass
+        try:
+            df_predict = pd.read_csv(data_predict)
+        except:
+            pass
+        try:
+            df_predict = pd.read_excel(data_predict)
+        except:
+            pass
+        try:
+            df_predict = pd.read_excel(data_predict,engine='openpyxl')
+        except:
+            pass
 
-#     for column in df_predict.columns:
-#         try:
-#             df_predict[column]=pd.to_numeric(df_predict[column],errors='coerce')
-#         except:
-#             pass
+        for column in df_predict.columns:
+            try:
+                df_predict[column]=pd.to_numeric(df_predict[column],errors='coerce')
+            except:
+                pass
+        df_predict = df_predict[cols + [yy]]
+        if st.session_state['n']:
+            df_predict = pd.DataFrame(minmax_scaler.transform(df_predict),columns=df_predict.columns)
+        if st.session_state['n_d']:
+            df_predict = pd.DataFrame(power_transformer.transform(df_predict),columns=df_predict.columns)        
+        if st.session_state['s']:
+            df_predict = pd.DataFrame(standard_scaler.transform(df_predict),columns=df_predict.columns)         
 
-#     if st.session_state['n_d']:
-#         df_predict = pd.DataFrame(power_transformer.transform(df_predict),columns=df_predict.columns)        
-#     if st.session_state['s']:
-#         df_predict = pd.DataFrame(standard_scaler.transform(df_predict),columns=df_predict.columns)         
-#     if st.session_state['n']:
-#         df_predict = pd.DataFrame(minmax_scaler.transform(df_predict),columns=df_predict.columns)
-    
+        X_for_predection=df_predict[X.columns]
+        st.header('Predection results')
+        st.subheader('    input raw data for predection   ')
+        st.dataframe(X_for_predection)
+        for column in X_for_predection:
+            try:
+                X_for_predection[column]= X_for_predection[column].fillna(X_for_predection[column].mean())
+            except:
+                X_for_predection[column]= X_for_predection.fillna(X[column].mean())
 
-#     X_for_predection=df_predict[X.columns]
-#     st.header('Predection results')
-#     st.subheader('    input raw data for predection   ')
-#     st.dataframe(X_for_predection)
-#     try:
-#         X_for_predection= X_for_predection.fillna(X_for_predection.mean())
-#     except:
-#         X_for_predection= X_for_predection.fillna(X.mean())
-  
-#     predection_data=pd.DataFrame()
-#     predics=model.predict(X_for_predection)
-#     if len(predics)==1:
-#         pass
-#     else:
-#         predics=predics.reshape(-1)
-#     predection_data[yy]= predics
+        predection_data=pd.DataFrame()
+        predics=model.predict(X_for_predection)
+        if len(predics)==1:
+            pass
+        else:
+            predics=predics.reshape(-1)
+        predection_data[yy]= predics
 
-#     data_for_download= pd.concat([X_for_predection,predection_data],axis=1)
-#     st.write('******************************************************************')
-#     tab11, tab12 = st.columns(2)
-#     with tab11:
-#         st.markdown(" ##### Processed input data for predection")
-#         st.dataframe(X_for_predection)
+        data_for_download= pd.concat([X_for_predection,predection_data],axis=1)
+        st.write('******************************************************************')
+        tab11, tab12, tab13, tab14 = st.columns(4)
+        with tab11:
+            st.markdown(" ###### Processed input data for predection")
+            st.dataframe(X_for_predection)
 
-#     with tab12:
-#         st.markdown(" ##### predected values from processed input")
-#         st.dataframe(predection_data)
-#     def convert_df(df):
-#     # IMPORTANT: Cache the conversion to prevent computation on every rerun
-#         return df.to_csv(index=False).encode('utf-8')
-    
-#     csv_file = convert_df(data_for_download)
-#     st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv')
+        with tab12:
+            st.markdown(" ###### Predected values from processed input")
+            st.dataframe(predection_data)
+        # after predicting converting the values to the initial form
+        X_inverse_containing_y_predicted = X_for_predection.copy()
+        X_inverse_containing_y_predicted[yy]=predics
+        X_inverse_containing_y_predicted_to_original=X_inverse_containing_y_predicted.copy()  
+        # reverse order for preprocessing steps
+        if st.session_state['s']:
+            X_inverse_containing_y_predicted_to_original = pd.DataFrame(standard_scaler.inverse_transform(X_inverse_containing_y_predicted_to_original),columns=X_inverse_containing_y_predicted_to_original.columns)
+        if st.session_state['n_d']:
+            X_inverse_containing_y_predicted_to_original = pd.DataFrame(power_transformer.inverse_transform(X_inverse_containing_y_predicted_to_original),columns=X_inverse_containing_y_predicted_to_original.columns)
+        if st.session_state['n']:
+            X_inverse_containing_y_predicted_to_original = pd.DataFrame(minmax_scaler.inverse_transform(X_inverse_containing_y_predicted_to_original),columns=X_inverse_containing_y_predicted_to_original.columns)               
+        with tab13:
+            st.markdown('###### Returned X-values after inversing prprocessing')
+            st.dataframe(X_inverse_containing_y_predicted_to_original[X.columns])
+        with tab14:
+            st.markdown('###### y-Values after inversing preprocessing')
+            st.dataframe(X_inverse_containing_y_predicted_to_original[yy])
+            
+        def convert_df(df):
+        # IMPORTANT: Cache the conversion to prevent computation on every rerun
+            return df.to_csv(index=False).encode('utf-8')
+        
+        csv_file = convert_df(data_for_download)
+        st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv')
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
 
