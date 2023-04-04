@@ -145,8 +145,17 @@ if data is not None:
     df=df_raw.copy()
     for column in df.columns:
         df[column]=pd.to_numeric(df[column],errors='coerce')
-    df_whole_numbers=df.copy()
+    # drop columns with all missing values
+    df = df.dropna(axis=1, how='all')
 
+    
+    #Initial Nan processing
+    if st.sidebar.checkbox(" Initial processing of Nan values"):
+        st.sidebar.write('Choose the percentage of NaN present in each column, any column having more than this percent will be removed from the dataset')
+        zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,110,10)))        
+        df=df.dropna(axis='columns', how='any', thresh=df.shape[0]*(1-(zz/100)))
+
+    df_whole_numbers=df.copy()
 
     st.sidebar.write('======================================')
     
@@ -178,10 +187,7 @@ if data is not None:
 
       
     # preprocessing options
-    if st.sidebar.checkbox(" process Nan values",value=True):
-        st.sidebar.write('Choose the percentage of NaN present in each column, any column having more than this percent will be removed from the dataset')
-        zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,100,10)))        
-        df=df.dropna(axis='columns', how='any', thresh=df.shape[0]*(1-(zz/100)))
+    if st.sidebar.checkbox(" additional processing of Nan values"):
         substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Forward fill','Backward fill','Delete Nan rows'),index=5)
         if substitution =='Replace by Median':
             df=df.fillna(df.median())
@@ -192,9 +198,9 @@ if data is not None:
         elif substitution=='Forward fill':
             df=df.ffill(axis=0)
         elif substitution=='Backward fill':
-            df=df.bfill(axis ='rows')
+            df = df.fillna(method='ffill').fillna(method='bfill').fillna(df.mean())
         else:
-            df=df.fillna(df.mean())
+            df = df.fillna(method='bfill').fillna(method='ffill').fillna(df.mean())
         st.sidebar.write('======================================')
         st.write('dataset after nan processing')
         st.write(df.describe())
@@ -516,8 +522,10 @@ if data is not None:
 
 st.sidebar.write('======================================') 
 st.sidebar.write('======================================') 
-st.sidebar.write('======================================') 
+st.sidebar.write('======================================')
+
  
+# Prediction Button 
 if st.sidebar.checkbox('predict target from input data?'):
     st.write('******************************************************************')    
     st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
