@@ -14,7 +14,7 @@ from sklearn.neighbors import KNeighborsRegressor
 import plotly.express as px
 import plotly.graph_objects as go
 import sklearn
-import shap
+#import shap
 import streamlit as st
 import scipy.stats as stats
 
