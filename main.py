@@ -188,15 +188,13 @@ if data is not None:
       
     # preprocessing options
     if st.sidebar.checkbox(" additional processing of Nan values"):
-        substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Forward fill','Backward fill','Delete Nan rows'),index=5)
+        substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Backward fill','Delete Nan rows'),index=5)
         if substitution =='Replace by Median':
             df=df.fillna(df.median())
         elif substitution =='Replace by Most Frequent':
             df=df.fillna(df.mode().iloc[0])
         elif substitution =='Delete Nan rows':
             df.dropna(inplace=True)
-        elif substitution=='Forward fill':
-            df=df.ffill(axis=0)
         elif substitution=='Backward fill':
             df = df.fillna(method='ffill').fillna(method='bfill').fillna(df.mean())
         else:
