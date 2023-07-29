@@ -24,29 +24,31 @@ st.set_page_config("machine learning app",":chart_with_upwards_trend:")#,layout=
 st.title('Simple machine learner app')
 st.header('=================================')
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["How to run the app", "Definitions","About machine learning","How to choose the algorithm", "Example"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Main app","How to run the app", "Definitions","About machine learning","How to choose the algorithm", "Example"])
 
 with tab1:
-   st.header("How to run the app")
-   st.markdown("* ##### All inputs or commands from the left sidebar")
-   st.markdown("* ##### All output is shown  in the main page")
-   st.markdown("* ##### It is recommended to clear cache before starting any new project from top right corner")
-   st.markdown("1- Upload csv or excel file with column names in the first row")
-   st.markdown("2- Choose one of the columns as the target (Y)")
-   st.markdown("3- All other columns will be by default automatically selected as independent variable (X1,X2,...ect) unless other options are checked")
-   st.markdown("4- You can choose to remove some columns from the model, or only include some models in the algorithm model")
-   st.markdown("5- All data that is not numbers will be converted to Nan automatically ")
-   st.markdown("6- Choose the Maximum allowed percent of Nan values per columns, columns which has higher percentage will be removed, default is 90 % ")
-   st.markdown("7- Choose Problem nature, weather continuous or Classification")
-   st.markdown("8- Choose the model algorithm")
-   st.markdown("9- The algorithm will run to find the best relation that describes target from independent variables")
-   st.markdown("10- Output is correlation of determination for training, testing sets and predicted target")
-   st.markdown("11- Output can be downloaded as CSV file")
-   st.markdown("12- You can check features effect on target visually")
-   st.markdown("13- Finally you can predict target by uploading CSV file identical to the previous one, with modified data for prediction, any number of rows is accepted in this new csv file")
-
-
+    st.markdown("## Main display area")
+    
 with tab2:
+    st.markdown(
+        """
+        ## How to use this app:
+        
+        1. Start by uploading a CSV or Excel file using the 'Choose csv file to upload for preprocessing and modeling' button on the left sidebar. This file should contain the data you want to train the model on. Make sure that your file contains a single sheet and the column names are defined in the first row.
+        2. From the 'Choose target variable' dropdown on the left sidebar, select the column that you want the model to predict.
+        3. Indicate whether the problem is a regression or classification problem by selecting the appropriate option from the 'Problem nature' radio buttons on the left sidebar.
+        4. Choose the machine learning model you want to use from the 'Choose algorithm model' dropdown on the left sidebar. The available options will change depending on whether you indicated a regression or classification problem.
+        5. After choosing your model, the application will train the model on your data. You can view the training and testing scores, as well as the mean absolute error for the training and testing data, on the left sidebar under the 'Machine learning model results' section.
+        6. If you want to understand the importance of each feature in your data, check the 'feature importance' checkbox on the left sidebar. You can choose between a 'Fast (not accurate enough)' calculation and a 'Shaply (slow but accurate)' calculation. The feature importance will be displayed in the main panel.
+        7. If you want to compare the model's predictions with the actual target values, check the 'Compare prediction, with actual data?' checkbox on the left sidebar. A table comparing the predictions and actual values will be displayed in the main panel.
+        8. If you have new data that you want to predict the target variable for, check the 'predict target from input data?' checkbox on the left sidebar and upload the new data using the 'Choose csv file to upload for prediction' button. Make sure the new data has the same structure as the original data. The predicted values will be displayed in the main panel, and you can download the predictions as a CSV file.
+        
+        Please ensure that your data is prepared correctly and does not contain any non-numeric values. If any errors occur, they will be displayed on the screen.
+        """
+    )
+
+
+with tab3:
    st.header("Definitions")
    list=['Target','Independent Variables','Dependent variable','Features','Features importance', 'Training score','Testing score','coeffecient of determination (R^2)','Training set/Testing set','mean absolute error','Nan','CSV','Continuos','Classification','Backward fill','Forward fill','polynomial']
    selection_tab2=st.selectbox('',list)
@@ -93,21 +95,31 @@ with tab2:
 
         
 
-with tab3:
-   st.header("About machine learning")
-   st.markdown("* Simply speaking, it is a way to know the relation between dependent variable and indepentent variables")
-   st.markdown("* there are several methods to build this relation, when the relation is built, this building is called machine learning algorithm")
-   st.markdown("* Machine learning algorithms vary where some depend on linear relationship, others depend on non linear relationship and others combine both")
-   st.markdown("* machine learning algorithm can predict the target based on dependent variables")
-   st.markdown("* machine learning algorithm can specify which features are important to influence target change` features importance`")
-
 with tab4:
+    st.markdown(
+        """
+        ## About Machine Learning
+        
+        Machine Learning is a subset of artificial intelligence (AI) that provides systems the ability to learn and improve from experience without being explicitly programmed. It focuses on the development of computer programs that can access data and use it to learn for themselves.
+
+        The learning process is based on feeding data to the system and allowing it to learn patterns and make decisions. For example, a machine learning model can be trained to recognize cats in a picture by showing it thousands of pictures of cats.
+
+        There are two types of problems in machine learning: 
+
+        - **Regression problems** involve predicting a continuous value. For example, predicting the price of a house based on its features is a regression problem.
+        - **Classification problems** involve predicting a category or class. For example, predicting whether an email is spam or not is a classification problem.
+        
+        Different machine learning models can be used depending on the type of problem and the data. This application allows you to choose from several models, train them on your data, and make predictions with the trained model.
+        """
+    )
+
+with tab5:
    st.header("How to choose the algorithm")
    st.markdown("* the ultimate way is to test each and all algorithms, and choose the one that achieves the best score in both training and testing sets")
    st.markdown("* in reality, this rarely happens as randomness plays a role here, also it is rarely found that one algorithms scores higher than all others in both training and testing sets")
    st.markdown("* Here a methedology that can help in choosing the best model [SCI-KIT LEARN METHODOLOGY](https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html)")
 
-with tab5:
+with tab6:
     st.markdown(" under preparation")
     #st.video('https://www.youtube.com/watch?v=hdLL5jjEOXM')
 
