@@ -164,12 +164,12 @@ if data is not None:
     #Initial Nan processing
     if st.sidebar.checkbox(" Initial processing of Nan values"):
         st.sidebar.write('Choose the percentage of NaN present in each column, any column having more than this percent will be removed from the dataset')
-        zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,110,10)))        
-        df=df.dropna(axis='columns', how='any', thresh=df.shape[0]*(1-(zz/100)))
+        zz=st.sidebar.selectbox('columns to be removed from data having NAN percentage more than :',reversed(range(10,100,10)))        
+        df=df.dropna(axis='columns', thresh=df.shape[0]*(1-(zz/100)))
 
     df_whole_numbers=df.copy()
 
-    st.sidebar.write('======================================')
+    st.sidebar.write('====================================')
     
     # Choosing Target and modeling configuration
     yy = st.sidebar.selectbox('Choose target or dependent variable (y)', df.columns)
@@ -192,7 +192,7 @@ if data is not None:
             pass
 
     df = df[cols + [yy]]
-    st.sidebar.write('======================================')
+    st.sidebar.write('====================================')
     
     #Saving dataframe before preprocessing
     df_before_preprocessing=df.copy()
@@ -211,7 +211,7 @@ if data is not None:
             df = df.fillna(method='ffill').fillna(method='bfill').fillna(df.mean())
         else:
             df = df.fillna(method='bfill').fillna(method='ffill').fillna(df.mean())
-        st.sidebar.write('======================================')
+        st.sidebar.write('====================================')
         st.write('dataset after nan processing')
         st.write(df.describe())
         st.write('******************************************************************')        
@@ -233,7 +233,7 @@ if data is not None:
             st.write('dataset could not be outliers removed')
             pass
         st.write('******************************************************************')
-        st.sidebar.write('======================================')
+        st.sidebar.write('====================================')
     # Saving dataframe after outlier removal and nan processing   
     df_after_outlierremov_and_nanprocess=df.copy()
     
@@ -249,7 +249,7 @@ if data is not None:
             st.write('dataset could not be normalized')
             pass
         st.write('******************************************************************')
-        st.sidebar.write('======================================')   
+        st.sidebar.write('====================================')   
     if st.sidebar.checkbox("Make dataset has normal distribution-(Normalize should be checked)",key='n_d'):
         try:
             power_transformer=PowerTransformer(standardize=False)
@@ -271,7 +271,7 @@ if data is not None:
             pass
         st.write('******************************************************************')            
       
-    st.sidebar.write('======================================')
+    st.sidebar.write('====================================')
 
 
 
@@ -392,7 +392,7 @@ if data is not None:
             shap_features=1
 
     #Features importance display
-    st.sidebar.write('======================================')
+    st.sidebar.write('====================================')
     if st.sidebar.checkbox('feature importance',value=True):
         effect=st.sidebar.radio('',options=['Fast(not accurate enough)','Shaply( slow but accurate)'])
         if effect=='Fast(not accurate enough)':
@@ -439,7 +439,7 @@ if data is not None:
         Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(power_transformer.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)
     if st.session_state['n']:
         Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(minmax_scaler.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)     
-    st.sidebar.write('======================================')
+    st.sidebar.write('====================================')
     st.write('******************************************************************')
     
     # Display comparing data
@@ -459,7 +459,7 @@ if data is not None:
 
 
     # Export data to excel files
-    st.sidebar.write('======================================')        
+    st.sidebar.write('====================================')        
     if st.sidebar.checkbox('Export data to excel file ?'):
         comparing=pd.DataFrame()
         comparing['Actual']=df_after_outlierremov_and_nanprocess[yy].values
@@ -480,7 +480,7 @@ if data is not None:
         st.write('******************************************************************')
     
     # display feature effect on target
-    st.sidebar.write('======================================')
+    st.sidebar.write('====================================')
     if st.sidebar.checkbox('feature importance effect on target'):
         if effect =='Fast(not accurate enough)':
             try:
@@ -530,9 +530,9 @@ if data is not None:
         # else:
         #     st.write(" * if algorith is polynomial regression, feature importance will be hard to plot ")
 
-st.sidebar.write('======================================') 
-st.sidebar.write('======================================') 
-st.sidebar.write('======================================')
+st.sidebar.write('====================================') 
+st.sidebar.write('====================================') 
+st.sidebar.write('====================================')
 
  
 # Prediction Button 
@@ -622,9 +622,9 @@ if st.sidebar.checkbox('predict target from input data?'):
         # IMPORTANT: Cache the conversion to prevent computation on every rerun
             return df.to_csv(index=False).encode('utf-8')
         
-        csv_file = convert_df(data_for_download)
+        csv_file = convert_df(X_inverse_containing_y_predicted_to_original)
         st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv')
-st.sidebar.write('======================================') 
-st.sidebar.write('======================================') 
+st.sidebar.write('====================================') 
+st.sidebar.write('====================================') 
 
 
