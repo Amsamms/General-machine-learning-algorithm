@@ -1,0 +1,13 @@
+name: Keep Streamlit App Awake
+
+on:
+  schedule:
+    - cron: '0 */20 * * *'  # Runs every 20 hours
+
+jobs:
+  keep-awake:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send GET request to Streamlit app
+        run: curl -X GET https://amsamms-general-machine-learning-algorithm-main-rs6nt9.streamlit.app/
