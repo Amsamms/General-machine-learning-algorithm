@@ -133,7 +133,8 @@ with tab6:
 
 st.write('******************************************************************')
 
-# Uploading data and converting it to numbers only 
+# Uploading data and converting it to numbers only
+st.sidebar.header("📁 Step 1: Upload Data")
 data= st.sidebar.file_uploader("Choose excel or csv file to upload",type=['csv','xls','xlsx'],key='1')
 if data is not None:
     try:
@@ -177,8 +178,9 @@ if data is not None:
 
     df_whole_numbers=df.copy()
 
-    st.sidebar.write('====================================')
-    
+    st.sidebar.markdown("---")
+    st.sidebar.header("🎯 Step 2: Select Target Variable")
+
     # Choosing Target and modeling configuration
     yy = st.sidebar.selectbox('Choose target or dependent variable (y)', df.columns)
 
@@ -200,12 +202,14 @@ if data is not None:
             pass
 
     df = df[cols + [yy]]
-    st.sidebar.write('====================================')
-    
+
+    st.sidebar.markdown("---")
+    st.sidebar.header("⚙️ Step 3: Data Preprocessing")
+
     #Saving dataframe before preprocessing
     df_before_preprocessing=df.copy()
 
-      
+
     # preprocessing options
     if st.sidebar.checkbox(" additional processing of Nan values"):
         substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Filling with Forward, Backward and Column Mean','Delete Nan rows'),index=4)
@@ -219,10 +223,9 @@ if data is not None:
             df = df.fillna(method='ffill').fillna(method='bfill').fillna(df.mean())
         else:
             df = df.fillna(method='bfill').fillna(method='ffill').fillna(df.mean())
-        st.sidebar.write('====================================')
         st.write('dataset after nan processing')
         st.write(df.describe())
-        st.write('******************************************************************')        
+        st.write('******************************************************************')
     if st.sidebar.checkbox("Remove outliers from the data set"):
         try:
             outlier_limit=st.sidebar.slider('Number of Standard deviations data will be filtered upon',1.0,10.0,4.0,0.2)
@@ -241,10 +244,9 @@ if data is not None:
             st.write('dataset could not be outliers removed')
             pass
         st.write('******************************************************************')
-        st.sidebar.write('====================================')
-    # Saving dataframe after outlier removal and nan processing   
+    # Saving dataframe after outlier removal and nan processing
     df_after_outlierremov_and_nanprocess=df.copy()
-    
+
     if st.sidebar.checkbox(" Normalize dataset",key='n'):
         try:
             min_limit=st.sidebar.number_input('all columns will have minimum of:',value=1)
@@ -257,7 +259,6 @@ if data is not None:
             st.write('dataset could not be normalized')
             pass
         st.write('******************************************************************')
-        st.sidebar.write('====================================')   
     if st.sidebar.checkbox("Make dataset has normal distribution-(Normalize should be checked)",key='n_d'):
         try:
             power_transformer=PowerTransformer(standardize=False)
@@ -277,16 +278,12 @@ if data is not None:
         except:
             st.write('dataset could not be standarized')
             pass
-        st.write('******************************************************************')            
-      
-    st.sidebar.write('====================================')
+        st.write('******************************************************************')
 
-
+    st.sidebar.markdown("---")
 
     #Saving df after processing
     Whole_df_after_preprocessing=df.copy()
-
-
 
     # Assigning X and y
     st.write('**you choosed**', yy,'***to be the target**')
@@ -299,7 +296,9 @@ if data is not None:
     st.write('******************************************************************')
     st.write('******************************************************************')
     st.write('X shape:',X.shape,'Y shape:',y.shape)
-      
+
+    st.sidebar.header("🤖 Step 4: Choose Model")
+
     # Modeling and choosing algorithm
     problem_nature= st.sidebar.radio('Problem nature',['Continuos','Classification'],key='problem_nature')
     if problem_nature=='Continuos': 
@@ -365,8 +364,11 @@ if data is not None:
         testing_mean_error=mean_absolute_error(y_test,y_test_pred)
 
     #Displaying results
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("📊 Results")
     st.sidebar.write('training score = ',training_accuracy)
     st.sidebar.write('testing score = ',testing_accuracy)
+
     st.title('Machine learning model results:')
     st.header('training score:' )
     st.write(training_accuracy)
@@ -400,7 +402,8 @@ if data is not None:
             shap_features=1
 
     #Features importance display
-    st.sidebar.write('====================================')
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("📈 Analysis Options")
     if st.sidebar.checkbox('feature importance',value=True):
         effect=st.sidebar.radio('',options=['Fast(not accurate enough)','Shaply( slow but accurate)'])
         if effect=='Fast(not accurate enough)':
@@ -446,10 +449,9 @@ if data is not None:
     if st.session_state['n_d']:
         Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(power_transformer.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)
     if st.session_state['n']:
-        Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(minmax_scaler.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)     
-    st.sidebar.write('====================================')
+        Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(minmax_scaler.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)
     st.write('******************************************************************')
-    
+
     # Display comparing data
     if st.sidebar.checkbox('Compare prediction, with actual data ?'):
         comparing=pd.DataFrame()
@@ -467,7 +469,6 @@ if data is not None:
 
 
     # Export data to excel files
-    st.sidebar.write('====================================')        
     if st.sidebar.checkbox('Export data to excel file ?'):
         comparing=pd.DataFrame()
         comparing['Actual']=df_after_outlierremov_and_nanprocess[yy].values
@@ -486,9 +487,8 @@ if data is not None:
         st.download_button(label="Download actual/predicted Y as CSV", data=csv_2, file_name='Actual-predicted Y.csv', mime='text/csv')
         st.download_button(label="Download dataset after processing steps", data=csv_3, file_name='Processed_dataset.csv', mime='text/csv')
         st.write('******************************************************************')
-    
+
     # display feature effect on target
-    st.sidebar.write('====================================')
     if st.sidebar.checkbox('feature importance effect on target'):
         if effect =='Fast(not accurate enough)':
             try:
@@ -538,12 +538,10 @@ if data is not None:
         # else:
         #     st.write(" * if algorith is polynomial regression, feature importance will be hard to plot ")
 
-st.sidebar.write('====================================') 
-st.sidebar.write('====================================') 
-st.sidebar.write('====================================')
+st.sidebar.markdown("---")
+st.sidebar.subheader("🔮 Predictions")
 
- 
-# Prediction Button 
+# Prediction Button
 if st.sidebar.checkbox('predict target from input data?'):
     st.write('******************************************************************')    
     st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
@@ -631,8 +629,6 @@ if st.sidebar.checkbox('predict target from input data?'):
             return df.to_csv(index=False).encode('utf-8')
         
         csv_file = convert_df(X_inverse_containing_y_predicted_to_original)
-        st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv')
-st.sidebar.write('====================================') 
-st.sidebar.write('====================================') 
+        st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv') 
 
 
