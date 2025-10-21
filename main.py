@@ -19,116 +19,33 @@ import streamlit as st
 import scipy.stats as stats
 
 
-st.set_page_config("machine learning app",":chart_with_upwards_trend:",layout="wide",initial_sidebar_state="expanded")
+st.set_page_config("machine learning app",":chart_with_upwards_trend:")#,layout="wide",initial_sidebar_state="expanded")
 
-# Initialize session state for preprocessing flags
-if 'n' not in st.session_state:
-    st.session_state['n'] = False
-if 'n_d' not in st.session_state:
-    st.session_state['n_d'] = False
-if 's' not in st.session_state:
-    st.session_state['s'] = False
+st.title('Simple machine learner app')
+st.header('=================================')
 
-st.title('🤖 Machine Learning Application')
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 1.2rem;
-        color: #4A90E2;
-        padding: 10px 0;
-        border-bottom: 2px solid #4A90E2;
-        margin-bottom: 20px;
-    }
-    .step-box {
-        background-color: #f0f8ff;
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 5px solid #4A90E2;
-        margin: 10px 0;
-    }
-    .success-box {
-        background-color: #d4edda;
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 5px solid #28a745;
-        margin: 10px 0;
-    }
-    .info-box {
-        background-color: #fff3cd;
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 5px solid #ffc107;
-        margin: 10px 0;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("### Welcome! Train machine learning models in 4 easy steps - no coding required!")
-
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Main App","📖 Quick Start Guide", "📚 Definitions","🧠 About ML","💡 Algorithm Selection", "🎯 Examples"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Main app","How to run the app", "Definitions","About machine learning","How to choose the algorithm", "Example"])
 
 with tab1:
-    st.markdown('<div class="info-box">👈 Use the sidebar to get started! Follow the steps below.</div>', unsafe_allow_html=True)
-
+    st.markdown("## Main display area")
+    
 with tab2:
-    st.markdown("## 🚀 Quick Start Guide")
-
-    col1, col2 = st.columns([1, 2])
-
-    with col1:
-        st.markdown("### Step 1️⃣")
-        st.info("**Upload Data**")
-    with col2:
-        st.markdown("""
-        - Click the **'Choose excel or csv file to upload'** button in the sidebar
-        - Select your CSV or Excel file
-        - Ensure column names are in the first row
-        - Data should be mostly numeric
-        """)
-
-    st.markdown("---")
-
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.markdown("### Step 2️⃣")
-        st.info("**Configure Your Model**")
-    with col2:
-        st.markdown("""
-        - **Choose target variable**: Select the column you want to predict
-        - **Problem nature**: Select 'Continuous' for numeric predictions or 'Classification' for categories
-        - **Choose algorithm**: Pick a machine learning model from the dropdown
-        """)
-
-    st.markdown("---")
-
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.markdown("### Step 3️⃣")
-        st.info("**Optional: Preprocess**")
-    with col2:
-        st.markdown("""
-        - Handle missing values (NaN)
-        - Remove outliers
-        - Normalize or standardize data
-        - These steps can improve model performance
-        """)
-
-    st.markdown("---")
-
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.markdown("### Step 4️⃣")
-        st.info("**View Results**")
-    with col2:
-        st.markdown("""
-        - See training and testing scores
-        - Check feature importance
-        - Compare predictions vs actual values
-        - Export results to CSV
-        - Make predictions on new data
-        """)
-
-    st.success("💡 **Tip**: Work through the sidebar options from top to bottom for the best experience!")
+    st.markdown(
+        """
+        ## How to use this app:
+        
+        1. Start by uploading a CSV or Excel file using the 'Choose csv file to upload for preprocessing and modeling' button on the left sidebar. This file should contain the data you want to train the model on. Make sure that your file contains a single sheet and the column names are defined in the first row.
+        2. From the 'Choose target variable' dropdown on the left sidebar, select the column that you want the model to predict.
+        3. Indicate whether the problem is a regression or classification problem by selecting the appropriate option from the 'Problem nature' radio buttons on the left sidebar.
+        4. Choose the machine learning model you want to use from the 'Choose algorithm model' dropdown on the left sidebar. The available options will change depending on whether you indicated a regression or classification problem.
+        5. After choosing your model, the application will train the model on your data. You can view the training and testing scores, as well as the mean absolute error for the training and testing data, on the left sidebar under the 'Machine learning model results' section.
+        6. If you want to understand the importance of each feature in your data, check the 'feature importance' checkbox on the left sidebar. You can choose between a 'Fast (not accurate enough)' calculation and a 'Shaply (slow but accurate)' calculation. The feature importance will be displayed in the main panel.
+        7. If you want to compare the model's predictions with the actual target values, check the 'Compare prediction, with actual data?' checkbox on the left sidebar. A table comparing the predictions and actual values will be displayed in the main panel.
+        8. If you have new data that you want to predict the target variable for, check the 'predict target from input data?' checkbox on the left sidebar and upload the new data using the 'Choose csv file to upload for prediction' button. Make sure the new data has the same structure as the original data. The predicted values will be displayed in the main panel, and you can download the predictions as a CSV file.
+        
+        Please ensure that your data is prepared correctly and does not contain any non-numeric values. If any errors occur, they will be displayed on the screen.
+        """
+    )
 
 
 with tab3:
@@ -206,11 +123,10 @@ with tab6:
     st.markdown(" under preparation")
     #st.video('https://www.youtube.com/watch?v=hdLL5jjEOXM')
 
-st.markdown("---")
+st.write('******************************************************************')
 
-# Uploading data and converting it to numbers only
-st.sidebar.markdown("## 🔹 Step 1: Upload Your Data")
-data= st.sidebar.file_uploader("Choose excel or csv file to upload",type=['csv','xls','xlsx'],key='1',help="Upload a CSV or Excel file with your training data")
+# Uploading data and converting it to numbers only 
+data= st.sidebar.file_uploader("Choose excel or csv file to upload",type=['csv','xls','xlsx'],key='1')
 if data is not None:
     try:
         df_raw = pd.read_csv(data,encoding_errors='ignore')
@@ -229,15 +145,13 @@ if data is not None:
     except:
         pass
 else:
-    st.sidebar.info('📤 Please upload a CSV or Excel file to begin')
-    st.info("👈 **Get Started**: Upload your data file using the sidebar to begin training your model!")
-
+    st.sidebar.write('*Kindly upload valid csv data')
+    
 if data is not None:
-    st.sidebar.success('✅ Data uploaded successfully!')
     try:
-        with st.expander("📋 View Raw Dataset", expanded=True):
-            st.dataframe(df_raw)
-        st.markdown("---")
+        st.write('Raw dataset') 
+        st.dataframe(df_raw)
+        st.write('******************************************************************')
     except:
         pass
     df=df_raw.copy()
@@ -255,11 +169,10 @@ if data is not None:
 
     df_whole_numbers=df.copy()
 
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("## 🔹 Step 2: Configure Model")
-
+    st.sidebar.write('====================================')
+    
     # Choosing Target and modeling configuration
-    yy = st.sidebar.selectbox('Choose target or dependent variable (y)', df.columns, help="Select the column you want to predict")
+    yy = st.sidebar.selectbox('Choose target or dependent variable (y)', df.columns)
 
     cols = df.columns.tolist()
     cols.remove(yy)
@@ -279,18 +192,15 @@ if data is not None:
             pass
 
     df = df[cols + [yy]]
-
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("## 🔹 Step 3: Data Preprocessing (Optional)")
-
+    st.sidebar.write('====================================')
+    
     #Saving dataframe before preprocessing
     df_before_preprocessing=df.copy()
 
-
+      
     # preprocessing options
-    process_nan = st.sidebar.checkbox("🧹 Handle Missing Values (NaN)", key="process_nan")
-    if process_nan:
-        substitution=st.sidebar.radio("**Replace NaN values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Filling with Forward, Backward and Column Mean','Delete Nan rows'),index=4)
+    if st.sidebar.checkbox(" additional processing of Nan values"):
+        substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Filling with Forward, Backward and Column Mean','Delete Nan rows'),index=4)
         if substitution =='Replace by Median':
             df=df.fillna(df.median())
         elif substitution =='Replace by Most Frequent':
@@ -301,15 +211,15 @@ if data is not None:
             df = df.fillna(method='ffill').fillna(method='bfill').fillna(df.mean())
         else:
             df = df.fillna(method='bfill').fillna(method='ffill').fillna(df.mean())
-        with st.expander("📊 Dataset After NaN Processing", expanded=False):
-            st.write(df.describe())
-
-    remove_outliers = st.sidebar.checkbox("🎯 Remove Outliers", key="remove_outliers")
-    if remove_outliers:
+        st.sidebar.write('====================================')
+        st.write('dataset after nan processing')
+        st.write(df.describe())
+        st.write('******************************************************************')        
+    if st.sidebar.checkbox("Remove outliers from the data set"):
         try:
             outlier_limit=st.sidebar.slider('Number of Standard deviations data will be filtered upon',1.0,10.0,4.0,0.2)
             def df_without_outliers (data,a=4.0):
-                df=data.copy()
+                df=data.copy()    
                 z_scores = stats.zscore(df[df.describe().columns],nan_policy='omit')
                 z_scores.fillna(0,inplace=True)   # in case one column is filled with nan values
                 abs_z_scores = np.abs(z_scores)
@@ -317,80 +227,77 @@ if data is not None:
                 df_without_outliers = df[filtered_entries]
                 return df_without_outliers
             df = df_without_outliers(df, a= outlier_limit)
-            with st.expander("📊 Dataset After Outlier Removal", expanded=False):
-                st.write(df.describe())
+            st.write('dataset after outlier removal')
+            st.write(df.describe())
         except:
-            st.error('Dataset could not have outliers removed')
+            st.write('dataset could not be outliers removed')
             pass
-
-    # Saving dataframe after outlier removal and nan processing
+        st.write('******************************************************************')
+        st.sidebar.write('====================================')
+    # Saving dataframe after outlier removal and nan processing   
     df_after_outlierremov_and_nanprocess=df.copy()
-
-    normalize = st.sidebar.checkbox("📏 Normalize Data",key='n')
-    if normalize:
+    
+    if st.sidebar.checkbox(" Normalize dataset",key='n'):
         try:
             min_limit=st.sidebar.number_input('all columns will have minimum of:',value=1)
             max_limit=st.sidebar.number_input('all columns will have maximum of:',value=100)
             minmax_scaler=MinMaxScaler((min_limit,max_limit))
             df=pd.DataFrame(minmax_scaler.fit_transform(df),columns=df.columns)
-            with st.expander("📊 Dataset After Normalization", expanded=False):
-                st.write(df.describe())
+            st.write('dataset after Normalization')
+            st.write(df.describe())
         except:
-            st.error('Dataset could not be normalized')
+            st.write('dataset could not be normalized')
             pass
-
-    normal_dist = st.sidebar.checkbox("📊 Normal Distribution Transform",key='n_d',help="Apply this after normalization for better results")
-    if normal_dist:
+        st.write('******************************************************************')
+        st.sidebar.write('====================================')   
+    if st.sidebar.checkbox("Make dataset has normal distribution-(Normalize should be checked)",key='n_d'):
         try:
             power_transformer=PowerTransformer(standardize=False)
             df=pd.DataFrame(power_transformer.fit_transform(df),columns=df.columns)
-            with st.expander("📊 Dataset After Normal Distribution Transform", expanded=False):
-                st.write(df.describe())
+            st.write('dataset after normal distribution transformation')
+            st.write(df.describe())
         except:
-            st.error('Dataset could not be transformed to normal distribution')
+            st.write('dataset could not be transformed to normal distribution')
             pass
-
-    standardize = st.sidebar.checkbox("⚖️ Standardize Data",key='s')
-    if standardize:
+        st.write('******************************************************************')
+    if st.sidebar.checkbox("Standarize dataset",key='s'):
         try:
             standard_scaler= StandardScaler()
             df=pd.DataFrame(standard_scaler.fit_transform(df),columns=df.columns)
-            with st.expander("📊 Dataset After Standardization", expanded=False):
-                st.write(df.describe())
+            st.write('dataset after Standarization')
+            st.write(df.describe())
         except:
-            st.error('Dataset could not be standardized')
+            st.write('dataset could not be standarized')
             pass
+        st.write('******************************************************************')            
+      
+    st.sidebar.write('====================================')
 
-    st.sidebar.markdown("---")
+
 
     #Saving df after processing
     Whole_df_after_preprocessing=df.copy()
 
+
+
     # Assigning X and y
-    st.success(f'✅ **Target Variable Selected**: {yy}')
-
-    with st.expander("📊 Target Variable (y) Statistics", expanded=False):
-        y=df[[yy]]
-        st.write(y.describe())
-
+    st.write('**you choosed**', yy,'***to be the target**')
+    st.write('******************************************************************')
     y=df[[yy]]
+    st.write('y description :', y.describe())
+    st.write('******************************************************************')
     X=df.drop(yy,axis=1)
-
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Features (X) Shape", f"{X.shape[0]} rows × {X.shape[1]} columns")
-    with col2:
-        st.metric("Target (y) Shape", f"{y.shape[0]} rows × {y.shape[1]} column")
-
-    st.markdown("---")
-
+    st.write('******************************************************************')
+    st.write('******************************************************************')
+    st.write('******************************************************************')
+    st.write('X shape:',X.shape,'Y shape:',y.shape)
+      
     # Modeling and choosing algorithm
-    st.sidebar.markdown("## 🔹 Step 4: Select Algorithm")
-    problem_nature= st.sidebar.radio('Problem nature',['Continuos','Classification'],key='problem_nature',help="Continuous for numeric predictions, Classification for categories")
-    if problem_nature=='Continuos':
+    problem_nature= st.sidebar.radio('Problem nature',['Continuos','Classification'],key='problem_nature')
+    if problem_nature=='Continuos': 
         models=[DecisionTreeRegressor(),RandomForestRegressor(),AdaBoostRegressor(),GradientBoostingRegressor(),SGDRegressor(),ElasticNet(),Lasso(),LinearRegression(),SVR(kernel='linear'),SVR(kernel="rbf"),'polynomial regression',KNeighborsRegressor()]
         raw_model=st.sidebar.selectbox('Choose algorithm model',models)
-        st.info(f"🤖 **Selected Model**: {raw_model}")
+        st.write(raw_model)
         #st.write(type(raw_model))
         #if isinstance(raw_model, sklearn.linear_model._base.LinearRegression):
         if raw_model=='polynomial regression':
@@ -410,7 +317,10 @@ if data is not None:
                 raw_model=Pipeline([('polynomial',PolynomialFeatures(degree=degree)),('linear regression',LinearRegression())])
                 raw_model.fit(X_train,y_train)
             else:
-                raw_model.fit(X_train,y_train)
+                try:
+                    raw_model.fit(X_train,y_train,random_state=42)
+                except:
+                    raw_model.fit(X_train,y_train)
             return raw_model
         model= model_select_fit(raw_model)
         y_train_pred=model.predict(X_train)
@@ -422,16 +332,19 @@ if data is not None:
         testing_accuracy=r2_score(y_test,y_test_pred)
         testing_mean_error=mean_absolute_error(y_test,y_test_pred)
 
-    if problem_nature=='Classification':
+    if problem_nature=='Classification': 
         models=[DecisionTreeClassifier(),RandomForestClassifier(),AdaBoostClassifier(),GradientBoostingClassifier(),SVC(kernel='linear')]
         raw_model=st.sidebar.selectbox('Choose algorithm model',models)
-        st.info(f"🤖 **Selected Model**: {raw_model}")
+        st.write(raw_model)
         #st.write(type(raw_model))
         #if isinstance(raw_model, sklearn.linear_model._base.LinearRegression):
         X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
         @st.cache(allow_output_mutation=True)
-        def model_select_fit(raw_model):
-            raw_model.fit(X_train,y_train)
+        def model_select_fit(raw_model):     
+            try:
+                raw_model.fit(X_train,y_train,random_state=42)
+            except:
+                raw_model.fit(X_train,y_train)
             return raw_model
         model= model_select_fit(raw_model)
         y_train_pred=model.predict(X_train)
@@ -444,56 +357,18 @@ if data is not None:
         testing_mean_error=mean_absolute_error(y_test,y_test_pred)
 
     #Displaying results
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("## 📊 Model Performance")
-    st.sidebar.metric("Training Score", f"{training_accuracy:.4f}")
-    st.sidebar.metric("Testing Score", f"{testing_accuracy:.4f}")
-
-    st.markdown("---")
-    st.header('🎯 Machine Learning Model Results')
-
-    # Create columns for metrics
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        st.metric(
-            label="📈 Training Score",
-            value=f"{training_accuracy:.4f}",
-            help="Higher is better (max 1.0)"
-        )
-
-    with col2:
-        st.metric(
-            label="📉 Testing Score",
-            value=f"{testing_accuracy:.4f}",
-            help="Higher is better (max 1.0)"
-        )
-
-    with col3:
-        st.metric(
-            label="📊 Train MAE",
-            value=f"{training_mean_error:.4f}",
-            help="Mean Absolute Error - Lower is better"
-        )
-
-    with col4:
-        st.metric(
-            label="📊 Test MAE",
-            value=f"{testing_mean_error:.4f}",
-            help="Mean Absolute Error - Lower is better"
-        )
-
-    # Add interpretation
-    if testing_accuracy > 0.9:
-        st.success("🎉 Excellent model performance!")
-    elif testing_accuracy > 0.7:
-        st.info("👍 Good model performance!")
-    elif testing_accuracy > 0.5:
-        st.warning("⚠️ Moderate model performance. Consider trying different algorithms or preprocessing.")
-    else:
-        st.error("❌ Poor model performance. Try different preprocessing or algorithms.")
-
-    st.markdown("---")
+    st.sidebar.write('training score = ',training_accuracy)
+    st.sidebar.write('testing score = ',testing_accuracy)
+    st.title('Machine learning model results:')
+    st.header('training score:' )
+    st.write(training_accuracy)
+    st.header('testing score:')
+    st.write(testing_accuracy )
+    st.header('training mean absolute error:')
+    st.write(training_mean_error)
+    st.header('testing mean absolute error:')
+    st.write(testing_mean_error)
+    st.write('******************************************************************')
     
     #Features importance calculations
     feature_importance=pd.DataFrame()
@@ -517,25 +392,23 @@ if data is not None:
             shap_features=1
 
     #Features importance display
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("## 🔹 Step 5: Analysis & Export")
-    if st.sidebar.checkbox('📊 View Feature Importance',value=False):
-        effect=st.sidebar.radio('Calculation Method:',options=['Fast(not accurate enough)','Shaply( slow but accurate)'])
+    st.sidebar.write('====================================')
+    if st.sidebar.checkbox('feature importance',value=True):
+        effect=st.sidebar.radio('',options=['Fast(not accurate enough)','Shaply( slow but accurate)'])
         if effect=='Fast(not accurate enough)':
-            st.subheader('⚡ Fast Feature Importance')
+            st.header(' Fast feature importance:')
             try:
-                st.dataframe(feature_importance.sort_values(by='importance in the model',ascending=False), use_container_width=True)
+                st.dataframe(feature_importance.sort_values(by='importance in the model',ascending=False))
             except:
                 pass
             try:
-                st.dataframe(feature_importance.sort_values(by='column coeffecient',ascending=False), use_container_width=True)
+                st.dataframe(feature_importance.sort_values(by='column coeffecient',ascending=False))
             except:
                 pass
             if len(feature_importance.columns)<2:
-                st.warning('⚠️ Fast feature importance cannot be calculated for this algorithm. Try the Shaply option.')
+                st.write(' Fast feature importance can not be made for this algorithm, try Shaply option')
         elif effect=='Shaply( slow but accurate)':
-            st.subheader('🎯 SHAP Feature Importance')
-            st.info('⏳ This may take a few moments to calculate...')
+            st.header(' Shaply feature importance:')
             @st.cache
             def detailed_importance():
             # IMPORTANT: Cache Shaply features to prevent computation on every rerun
@@ -548,12 +421,12 @@ if data is not None:
             feature_importance=pd.DataFrame()
             feature_importance['Name']=shap_values.feature_names
             feature_importance['importance']=np.mean(np.abs(shap_values.values),axis=0)
-            st.dataframe(feature_importance.sort_values(by='importance',ascending=False), use_container_width=True)
+            st.dataframe(feature_importance.sort_values(by='importance',ascending=False))
             fig, ax = plt.subplots()
             shap.summary_plot(shap_values)
             st.pyplot(fig)
             #st.pyplot(fig=shap.summary_plot(shap_values),clear_figure=False)
-    st.markdown("---")
+    st.write('******************************************************************')
 
     # after predicting converting the values to the initial form
     Whole_df_after_preprocessing_contains_y_predict = Whole_df_after_preprocessing.copy()
@@ -565,39 +438,29 @@ if data is not None:
     if st.session_state['n_d']:
         Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(power_transformer.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)
     if st.session_state['n']:
-        Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(minmax_scaler.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)
-
+        Whole_df_after_preprocessing_contains_y_predict_transformed_to_original = pd.DataFrame(minmax_scaler.inverse_transform(Whole_df_after_preprocessing_contains_y_predict_transformed_to_original),columns=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original.columns)     
+    st.sidebar.write('====================================')
+    st.write('******************************************************************')
+    
     # Display comparing data
-    if st.sidebar.checkbox('📈 Compare Predictions vs Actual'):
+    if st.sidebar.checkbox('Compare prediction, with actual data ?'):
         comparing=pd.DataFrame()
         comparing['Actual']= df_after_outlierremov_and_nanprocess[yy].values
         comparing['prediction']=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original[yy].values
         comparing['difference']=np.abs(comparing['Actual']-comparing['prediction'])
-
-        st.subheader('📊 Actual vs Prediction Comparison')
-
-        col1, col2 = st.columns([2, 1])
-
-        with col1:
-            st.dataframe(comparing, use_container_width=True)
-
-        with col2:
-            st.write("**Statistics:**")
-            st.write(comparing.describe())
-
+        st.subheader('actual Vs prediction')
+        st.write(comparing)
+        st.write('******************************************************************')
+        st.write(comparing.describe())
         if problem_nature=='Continuos':
-            st.subheader('📈 Prediction Scatter Plot')
-            figure = px.scatter(comparing,x='Actual', y='prediction',
-                              title='Actual vs Predicted Values',
-                              labels={'Actual': 'Actual Values', 'prediction': 'Predicted Values'})
-            # Add perfect prediction line
-            figure.add_trace(go.Scatter(x=comparing['Actual'], y=comparing['Actual'],
-                                       mode='lines', name='Perfect Prediction',
-                                       line=dict(color='red', dash='dash')))
-            st.plotly_chart(figure, use_container_width=True)
+            figure = px.scatter(comparing,x='Actual', y='prediction')
+            st.plotly_chart(figure)
+
+
 
     # Export data to excel files
-    if st.sidebar.checkbox('💾 Export Results to CSV'):
+    st.sidebar.write('====================================')        
+    if st.sidebar.checkbox('Export data to excel file ?'):
         comparing=pd.DataFrame()
         comparing['Actual']=df_after_outlierremov_and_nanprocess[yy].values
         comparing['prediction']=Whole_df_after_preprocessing_contains_y_predict_transformed_to_original[yy].values
@@ -607,123 +470,77 @@ if data is not None:
             # IMPORTANT: Cache the conversion to prevent computation on every rerun
             return df.to_csv(index=False).encode('utf-8')
 
-        st.subheader('💾 Export Data Files')
-
-        col1, col2, col3 = st.columns(3)
-
         # csv_1 = convert_df(feature_importance)
         csv_1= convert_df(feature_importance)
         csv_2 = convert_df(comparing)
         csv_3 = convert_df(Whole_df_after_preprocessing)
-
-        with col1:
-            st.download_button(
-                label="📊 Feature Importance",
-                data=csv_1,
-                file_name='features_importance.csv',
-                mime='text/csv',
-                use_container_width=True
-            )
-
-        with col2:
-            st.download_button(
-                label="📈 Predictions vs Actual",
-                data=csv_2,
-                file_name='Actual-predicted Y.csv',
-                mime='text/csv',
-                use_container_width=True
-            )
-
-        with col3:
-            st.download_button(
-                label="📋 Processed Dataset",
-                data=csv_3,
-                file_name='Processed_dataset.csv',
-                mime='text/csv',
-                use_container_width=True
-            )
-
-        st.success('✅ Click the buttons above to download your files!')
-        st.markdown("---")
+        st.download_button(label="Download feature importance as CSV", data=csv_1, file_name='features_importance.csv', mime='text/csv')
+        st.download_button(label="Download actual/predicted Y as CSV", data=csv_2, file_name='Actual-predicted Y.csv', mime='text/csv')
+        st.download_button(label="Download dataset after processing steps", data=csv_3, file_name='Processed_dataset.csv', mime='text/csv')
+        st.write('******************************************************************')
     
     # display feature effect on target
-    if st.sidebar.checkbox('🔬 Analyze Feature Effects on Target'):
+    st.sidebar.write('====================================')
+    if st.sidebar.checkbox('feature importance effect on target'):
         if effect =='Fast(not accurate enough)':
             try:
-                st.subheader('🔬 Feature Effect on Target')
-                st.info('ℹ️ This analysis averages all other features while varying the selected feature to measure its individual impact on predictions.')
+                st.subheader('feature effect on target')
+                st.write(' all other features will be averaged and the chosen feature will be left as it is, then the model will be run and to measure its effect on target a plot is drawn')
                 sorted_features= feature_importance.sort_values(by=feature_importance.columns[1],ascending=False)['Name'].values
-                feature=st.sidebar.selectbox('Select feature to analyze:',sorted_features)
+                feature=st.sidebar.selectbox('Choose feature to evaluate its effect, based on the model',sorted_features)
                 if raw_model !='polynomial regression':
                     evaluation_df=X.copy()
                     for column in evaluation_df.drop(feature, axis=1).columns:
                         evaluation_df.loc[:,column]=evaluation_df[column].mean()
-
-                    with st.expander("📊 View Evaluation DataFrame", expanded=False):
-                        st.write(evaluation_df)
-
+                    st.write(evaluation_df)
                     y_evaluation=model.predict(evaluation_df)
                     if len(y_evaluation.shape)==1:
                         pass
                     else:
                         y_evaluation=y_evaluation.reshape(-1)
                     figure_1 = go.Figure()
-                    figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers',
-                                                  marker=dict(size=8, color='#4A90E2')))
-                    figure_1.update_layout(
-                        xaxis_title=feature,
-                        yaxis_title=yy,
-                        title=f'Effect of {feature} on {yy}',
-                        template='plotly_white'
-                    )
-                    st.plotly_chart(figure_1, use_container_width=True)
+                    figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers'))
+                    figure_1.update_layout(xaxis_title=feature, yaxis_title=yy,title= f'effect of changing {feature} on {yy} ')
+                    st.plotly_chart(figure_1)
                 else:
-                    st.warning("⚠️ For polynomial regression, individual feature effects are complex to visualize due to interaction terms.")
+                    st.write(" * if algorith is polynomial regression, feature importance will be hard to plot ")
             except:
-                st.error('❌ Fast feature importance cannot be calculated for this algorithm. Try the Shaply option.')
+                st.write('Fast feature importance can not be made for this algorithm, try Shaply option')
         else:
-            st.subheader('🎯 SHAP Feature Effect on Target')
-            st.info('ℹ️ This analysis averages all other features while varying the selected feature to measure its individual impact on predictions.')
+            st.subheader('shaply feature effect on target')
+            st.write(' all other features will be averaged and the choosed feature will be left as it is, then the model will be run and to measure its effect on target a plot is drawn')
             sorted_features= feature_importance.sort_values(by=feature_importance.columns[1],ascending=False)['Name'].values
-            feature=st.sidebar.selectbox('Select feature to analyze:',sorted_features)
+            feature=st.sidebar.selectbox('Choose feature to evaluate its effect, based on the model',sorted_features)
             # if raw_model !='polynomial regression':
             evaluation_df=X.copy()
             for column in evaluation_df.drop(feature, axis=1).columns:
                 evaluation_df.loc[:,column]=evaluation_df[column].mean()
             for column in evaluation_df.drop(feature, axis=1).columns:
                 evaluation_df[column]=pd.to_numeric(evaluation_df[column],errors='coerce')
-
-            with st.expander("📊 View Evaluation DataFrame", expanded=False):
-                st.write(evaluation_df)
-
+            st.write(evaluation_df)
             y_evaluation=model.predict(evaluation_df)
             if len(y_evaluation.shape)==1:
                 pass
             else:
                 y_evaluation=y_evaluation.reshape(-1)
             figure_1 = go.Figure()
-            figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers',
-                                         marker=dict(size=8, color='#28a745')))
-            figure_1.update_layout(
-                xaxis_title=feature,
-                yaxis_title=yy,
-                title=f'Effect of {feature} on {yy}',
-                template='plotly_white'
-            )
-            st.plotly_chart(figure_1, use_container_width=True)
+            figure_1.add_trace(go.Scatter(x=evaluation_df[feature], y=y_evaluation,mode='markers'))
+            figure_1.update_layout(xaxis_title=feature, yaxis_title=yy,title= f'effect of changing {feature} on {yy} ')
+            st.plotly_chart(figure_1)
         # else:
         #     st.write(" * if algorith is polynomial regression, feature importance will be hard to plot ")
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("---")
+st.sidebar.write('====================================') 
+st.sidebar.write('====================================') 
+st.sidebar.write('====================================')
 
-# Prediction Button
-if st.sidebar.checkbox('🔮 Predict on New Data'):
-    st.markdown("---")
-    st.header('🔮 Make Predictions on New Data')
-    st.sidebar.markdown("#### 📤 Upload New Data")
-    data_predict= st.sidebar.file_uploader("Choose csv file to upload for prediction",type=['csv','xls','xlsx'],key='2',help="Upload new data with same structure as training data")
-    st.info('📋 **Important**: Upload data with the same column names as your training data. The target column should be included (values can be dummy/placeholder).')
+ 
+# Prediction Button 
+if st.sidebar.checkbox('predict target from input data?'):
+    st.write('******************************************************************')    
+    st.sidebar.markdown("### upload files in the second upload bottom only when you want to predict ")
+    data_predict= st.sidebar.file_uploader("Choose csv file to upload for predection",type=['csv','xls','xlsx'],key='2')  
+    st.sidebar.write('*Kindly upload valid excel or csv data for predection, with the same column names as the original one including the target, all data should be numbers with no NaN values')
     if data_predict is not None:  
         try:
             df_predict = pd.read_csv(data_predict,encoding_errors='ignore')
@@ -756,11 +573,9 @@ if st.sidebar.checkbox('🔮 Predict on New Data'):
             df_predict = pd.DataFrame(standard_scaler.transform(df_predict),columns=df_predict.columns)         
 
         X_for_predection=df_predict[X.columns]
-        st.success('✅ New data uploaded successfully!')
-        st.subheader('📊 Prediction Results')
-
-        with st.expander('📋 View Input Data for Prediction', expanded=False):
-            st.dataframe(X_for_predection, use_container_width=True)
+        st.header('Predection results')
+        st.subheader('    input raw data for predection   ')
+        st.dataframe(X_for_predection)
         for column in X_for_predection:
             try:
                 X_for_predection[column]= X_for_predection[column].fillna(X_for_predection[column].mean())
@@ -776,18 +591,15 @@ if st.sidebar.checkbox('🔮 Predict on New Data'):
         predection_data[yy]= predics
 
         data_for_download= pd.concat([X_for_predection,predection_data],axis=1)
-
-        st.markdown("---")
-
-        tab11, tab12, tab13, tab14 = st.tabs(["📊 Processed Input", "🎯 Predictions", "🔄 Original Scale Input", "✅ Final Predictions"])
-
+        st.write('******************************************************************')
+        tab11, tab12, tab13, tab14 = st.columns(4)
         with tab11:
-            st.markdown("**Processed Input Data**")
-            st.dataframe(X_for_predection, use_container_width=True)
+            st.markdown(" ###### Processed input data for predection")
+            st.dataframe(X_for_predection)
 
         with tab12:
-            st.markdown("**Predicted Values (Processed Scale)**")
-            st.dataframe(predection_data, use_container_width=True)
+            st.markdown(" ###### Predected values from processed input")
+            st.dataframe(predection_data)
         # after predicting converting the values to the initial form
         X_inverse_containing_y_predicted = X_for_predection.copy()
         X_inverse_containing_y_predicted[yy]=predics
@@ -798,36 +610,21 @@ if st.sidebar.checkbox('🔮 Predict on New Data'):
         if st.session_state['n_d']:
             X_inverse_containing_y_predicted_to_original = pd.DataFrame(power_transformer.inverse_transform(X_inverse_containing_y_predicted_to_original),columns=X_inverse_containing_y_predicted_to_original.columns)
         if st.session_state['n']:
-            X_inverse_containing_y_predicted_to_original = pd.DataFrame(minmax_scaler.inverse_transform(X_inverse_containing_y_predicted_to_original),columns=X_inverse_containing_y_predicted_to_original.columns)
-
+            X_inverse_containing_y_predicted_to_original = pd.DataFrame(minmax_scaler.inverse_transform(X_inverse_containing_y_predicted_to_original),columns=X_inverse_containing_y_predicted_to_original.columns)               
         with tab13:
-            st.markdown("**Input Features (Original Scale)**")
-            st.dataframe(X_inverse_containing_y_predicted_to_original[X.columns], use_container_width=True)
-
+            st.markdown('###### Returned X-values after inversing prprocessing')
+            st.dataframe(X_inverse_containing_y_predicted_to_original[X.columns])
         with tab14:
-            st.markdown("**Final Predictions (Original Scale)**")
-            st.dataframe(X_inverse_containing_y_predicted_to_original[[yy]], use_container_width=True)
-
-        st.markdown("---")
-
+            st.markdown('###### y-Values after inversing preprocessing')
+            st.dataframe(X_inverse_containing_y_predicted_to_original[yy])
+            
         def convert_df(df):
         # IMPORTANT: Cache the conversion to prevent computation on every rerun
             return df.to_csv(index=False).encode('utf-8')
-
+        
         csv_file = convert_df(X_inverse_containing_y_predicted_to_original)
-
-        col1, col2, col3 = st.columns([1,1,1])
-        with col2:
-            st.download_button(
-                label="💾 Download Predictions as CSV",
-                data=csv_file,
-                file_name='prediction_data.csv',
-                mime='text/csv',
-                use_container_width=True
-            )
-
-        st.success('✅ Predictions complete! Download your results above.')
-
-st.sidebar.markdown("---") 
+        st.download_button(label="Download data as CSV", data=csv_file, file_name='predection_data.csv', mime='text/csv')
+st.sidebar.write('====================================') 
+st.sidebar.write('====================================') 
 
 
