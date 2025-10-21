@@ -21,6 +21,14 @@ import scipy.stats as stats
 
 st.set_page_config("machine learning app",":chart_with_upwards_trend:")#,layout="wide",initial_sidebar_state="expanded")
 
+# Initialize session state for preprocessing flags to prevent crashes
+if 'n' not in st.session_state:
+    st.session_state['n'] = False
+if 'n_d' not in st.session_state:
+    st.session_state['n_d'] = False
+if 's' not in st.session_state:
+    st.session_state['s'] = False
+
 st.title('Simple machine learner app')
 st.header('=================================')
 
