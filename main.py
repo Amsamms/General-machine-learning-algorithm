@@ -288,9 +288,9 @@ if data is not None:
 
 
     # preprocessing options
-    with st.sidebar.expander("🧹 Handle Missing Values (NaN)", expanded=False):
-     if st.checkbox(" Process Nan values", key="process_nan"):
-        substitution=st.sidebar.radio("**replace Nan values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Filling with Forward, Backward and Column Mean','Delete Nan rows'),index=4)
+    process_nan = st.sidebar.checkbox("🧹 Handle Missing Values (NaN)", key="process_nan")
+    if process_nan:
+        substitution=st.sidebar.radio("**Replace NaN values or delete them**",('Replace by Median','Replace by Most Frequent','Replace by Mean','Filling with Forward, Backward and Column Mean','Delete Nan rows'),index=4)
         if substitution =='Replace by Median':
             df=df.fillna(df.median())
         elif substitution =='Replace by Most Frequent':
@@ -301,15 +301,15 @@ if data is not None:
             df = df.fillna(method='ffill').fillna(method='bfill').fillna(df.mean())
         else:
             df = df.fillna(method='bfill').fillna(method='ffill').fillna(df.mean())
-        with st.expander("📊 Dataset After NaN Processing"):
+        with st.expander("📊 Dataset After NaN Processing", expanded=False):
             st.write(df.describe())
 
-    with st.sidebar.expander("🎯 Remove Outliers", expanded=False):
-     if st.checkbox("Remove outliers from the data set", key="remove_outliers"):
+    remove_outliers = st.sidebar.checkbox("🎯 Remove Outliers", key="remove_outliers")
+    if remove_outliers:
         try:
             outlier_limit=st.sidebar.slider('Number of Standard deviations data will be filtered upon',1.0,10.0,4.0,0.2)
             def df_without_outliers (data,a=4.0):
-                df=data.copy()    
+                df=data.copy()
                 z_scores = stats.zscore(df[df.describe().columns],nan_policy='omit')
                 z_scores.fillna(0,inplace=True)   # in case one column is filled with nan values
                 abs_z_scores = np.abs(z_scores)
@@ -317,7 +317,7 @@ if data is not None:
                 df_without_outliers = df[filtered_entries]
                 return df_without_outliers
             df = df_without_outliers(df, a= outlier_limit)
-            with st.expander("📊 Dataset After Outlier Removal"):
+            with st.expander("📊 Dataset After Outlier Removal", expanded=False):
                 st.write(df.describe())
         except:
             st.error('Dataset could not have outliers removed')
@@ -326,36 +326,36 @@ if data is not None:
     # Saving dataframe after outlier removal and nan processing
     df_after_outlierremov_and_nanprocess=df.copy()
 
-    with st.sidebar.expander("📏 Normalize Data", expanded=False):
-     if st.checkbox("Normalize dataset",key='n'):
+    normalize = st.sidebar.checkbox("📏 Normalize Data",key='n')
+    if normalize:
         try:
             min_limit=st.sidebar.number_input('all columns will have minimum of:',value=1)
             max_limit=st.sidebar.number_input('all columns will have maximum of:',value=100)
             minmax_scaler=MinMaxScaler((min_limit,max_limit))
             df=pd.DataFrame(minmax_scaler.fit_transform(df),columns=df.columns)
-            with st.expander("📊 Dataset After Normalization"):
+            with st.expander("📊 Dataset After Normalization", expanded=False):
                 st.write(df.describe())
         except:
             st.error('Dataset could not be normalized')
             pass
 
-    with st.sidebar.expander("📊 Normal Distribution Transform", expanded=False):
-     if st.checkbox("Make dataset has normal distribution",key='n_d',help="Apply this after normalization for better results"):
+    normal_dist = st.sidebar.checkbox("📊 Normal Distribution Transform",key='n_d',help="Apply this after normalization for better results")
+    if normal_dist:
         try:
             power_transformer=PowerTransformer(standardize=False)
             df=pd.DataFrame(power_transformer.fit_transform(df),columns=df.columns)
-            with st.expander("📊 Dataset After Normal Distribution Transform"):
+            with st.expander("📊 Dataset After Normal Distribution Transform", expanded=False):
                 st.write(df.describe())
         except:
             st.error('Dataset could not be transformed to normal distribution')
             pass
 
-    with st.sidebar.expander("⚖️ Standardize Data", expanded=False):
-     if st.checkbox("Standardize dataset",key='s'):
+    standardize = st.sidebar.checkbox("⚖️ Standardize Data",key='s')
+    if standardize:
         try:
             standard_scaler= StandardScaler()
             df=pd.DataFrame(standard_scaler.fit_transform(df),columns=df.columns)
-            with st.expander("📊 Dataset After Standardization"):
+            with st.expander("📊 Dataset After Standardization", expanded=False):
                 st.write(df.describe())
         except:
             st.error('Dataset could not be standardized')
